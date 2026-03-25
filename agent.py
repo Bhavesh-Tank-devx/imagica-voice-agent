@@ -1,6 +1,9 @@
 # agent.py
+import asyncio
+import json
 import logging
 import os
+from datetime import datetime
 from dotenv import load_dotenv
 
 from livekit.agents import (
@@ -14,7 +17,16 @@ from livekit.agents import (
 )
 from livekit.plugins import google
 
-from mock_data import CART_DATA
+from mock_data import CART_DATA  # fallback for local dev (python agent.py dev)
+from post_call import (
+    DISPOSITION_BOOKED,
+    DISPOSITION_CALLBACK,
+    DISPOSITION_NOT_INTERESTED,
+    DISPOSITION_NO_ANSWER,
+    DISPOSITION_TRANSFERRED,
+    log_call,
+)
+from retry import RETRYABLE_DISPOSITIONS, MAX_ATTEMPTS, schedule_retry
 
 load_dotenv()
 logger = logging.getLogger("imagica-agent")
@@ -48,7 +60,7 @@ Your job is to gently remind them, understand their concern, and help them compl
 1. **Opening** — Greet warmly, introduce yourself, mention the cart naturally (not robotically).
 2. **Listen** — Ask why they didn't complete. Let them talk.
 3. **Address concern** — Price issue? Offer discount (max 10%). Busy? Schedule callback. Confused? Send link.
-4. **Close** — Either get commitment to book, send link, or schedule follow-up.
+4. **Close** — The moment customer says yes (any form: "haan", "theek hai", "okay", "sure", "book kar lunga") — call send_booking_link() IMMEDIATELY, before saying anything else. Do not wait to finish your sentence first.
 5. **Exit gracefully** — If they say no firmly, mark not interested and wish them well. Never be pushy.
 
 ## Tone Rules
@@ -84,14 +96,26 @@ class PriyaAgent(Agent):
     def __init__(self, cart: dict):
         super().__init__(instructions=build_system_prompt(cart))
         self.cart = cart
+        self.disposition = DISPOSITION_NO_ANSWER  # updated by whichever tool fires last
+        self.discount = 0
+        self.called_at = datetime.now().isoformat()
+
+    async def on_enter(self) -> None:
+        # Kick off the opening greeting the moment Priya enters the session.
+        # Without this, the realtime model waits silently for the user to speak first.
+        await self.session.generate_reply(
+            instructions="Start the call now with your opening greeting as described in your instructions."
+        )
 
     @function_tool
     async def send_booking_link(self) -> str:
         """Send the booking link to the customer via SMS so they can complete the purchase.
-        Triggered when customer agrees to complete the booking."""
+        Call this IMMEDIATELY the moment customer verbally agrees to book — do not delay.
+        Any positive signal counts: 'haan', 'okay', 'theek hai', 'sure', 'book kar lunga', 'send the link'."""
         link = self.cart["booking_link"]
         phone = self.cart["customer_phone"]
         logger.info(f"[MOCK] Sending booking link to {phone}: {link}")
+        self.disposition = DISPOSITION_BOOKED
         # In production: call SMS API here (Twilio / MSG91)
         return f"Booking link sent to {phone}. Link: {link}"
 
@@ -106,6 +130,7 @@ class PriyaAgent(Agent):
         logger.info(
             f"[MOCK] Callback scheduled for {self.cart['customer_name']} at: {preferred_time}"
         )
+        self.disposition = DISPOSITION_CALLBACK
         # In production: write to DynamoDB / Step Functions scheduler
         return f"Callback scheduled for {preferred_time}."
 
@@ -118,6 +143,7 @@ class PriyaAgent(Agent):
             reason: Brief reason for transfer, e.g. 'customer upset about pricing'
         """
         logger.info(f"[MOCK] Transferring call to human. Reason: {reason}")
+        self.disposition = DISPOSITION_TRANSFERRED
         # In production: initiate SIP transfer to CCT queue number
         return "Transferring you to our customer care team now. Please hold."
 
@@ -132,6 +158,7 @@ class PriyaAgent(Agent):
         logger.info(
             f"[MOCK] Marking {self.cart['customer_name']} as not interested. Reason: {reason}"
         )
+        self.disposition = DISPOSITION_NOT_INTERESTED
         # In production: update Zoho CRM disposition field
         return "Noted. No further calls will be made."
 
@@ -149,6 +176,7 @@ class PriyaAgent(Agent):
         logger.info(
             f"[MOCK] Applying {discount_percent}% discount. ₹{original} → ₹{discounted}"
         )
+        self.discount = discount_percent
         # In production: call Imagica booking API to apply promo code
         return (
             f"Applied {discount_percent}% discount. "
@@ -159,6 +187,15 @@ class PriyaAgent(Agent):
 
 async def entrypoint(ctx: JobContext):
     logger.info("Agent starting, connecting to LiveKit room...")
+
+    # Cart data comes from webhook dispatch metadata; fall back to mock data in dev
+    cart = CART_DATA
+    if ctx.job.metadata:
+        try:
+            cart = json.loads(ctx.job.metadata)
+            logger.info(f"Loaded cart from job metadata: cart_id={cart.get('cart_id')}")
+        except Exception as exc:
+            logger.warning(f"Failed to parse job metadata, using mock data: {exc}")
 
     await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
 
@@ -173,21 +210,72 @@ async def entrypoint(ctx: JobContext):
         # Voice options: Puck, Charon, Kore, Fenrir, Aoede
         voice="Aoede",
         temperature=0.8,
+        # Reduce false VAD triggers from phone line echo/sidetone.
+        # On SIP calls, Priya's audio leaks back through the phone mic and can be
+        # mistaken for the user speaking, causing mid-sentence interruptions.
+        input_audio_noise_suppression="NEAR_FIELD",
     )
 
     session = AgentSession(llm=model)
+    priya = PriyaAgent(cart)
 
-    await session.start(
-        room=ctx.room,
-        agent=PriyaAgent(CART_DATA),
+    # Fire when the human participant leaves (customer hangs up / closes playground)
+    # "disconnected" only fires when the agent loses its own connection — wrong event.
+    call_ended = asyncio.Event()
+
+    @ctx.room.on("participant_disconnected")
+    def on_participant_left(p):
+        logger.info(f"Participant left: {p.identity} — call ending")
+        call_ended.set()
+
+    # When Gemini Live fails to connect (e.g. DNS/auth error), the AgentSession closes
+    # itself with an unrecoverable error. Without this handler, the entrypoint would sit
+    # silently waiting for the customer to hang up (~30s of dead air).
+    # Firing call_ended.set() on a normal call end is harmless — asyncio.Event is idempotent.
+    @session.on("close")
+    def on_session_close():
+        call_ended.set()
+
+    await session.start(room=ctx.room, agent=priya)
+    logger.info(f"Priya is live for {cart['customer_name']}! Waiting for conversation...")
+
+    await call_ended.wait()
+
+    summary_map = {
+        "BOOKED": "Customer agreed to book; booking link sent via SMS.",
+        "CALLBACK": "Customer requested callback at a later time.",
+        "NOT_INTERESTED": "Customer not interested; no further calls.",
+        "TRANSFERRED": "Call transferred to human agent.",
+        "NO_ANSWER": "Call ended with no conclusive outcome.",
+    }
+    summary = summary_map.get(priya.disposition, "Call ended.")
+    log_call(
+        cart=cart,
+        disposition=priya.disposition,
+        transcript=[],  # transcript capture requires speech events — future step
+        summary=summary,
+        discount=priya.discount,
+        called_at=priya.called_at,
     )
+    logger.info(f"Call logged: cart_id={cart['cart_id']} disposition={priya.disposition}")
 
-    logger.info("Priya is live! Waiting for conversation...")
+    # Retry logic: hand off to FastAPI server which holds the sleep in its own event loop.
+    # asyncio.create_task would be killed when this subprocess exits — don't use it here.
+    if (
+        priya.disposition in RETRYABLE_DISPOSITIONS
+        and cart.get("attempt_number", 1) < MAX_ATTEMPTS
+    ):
+        await schedule_retry(cart)
+
+    # Explicitly disconnect so the worker process doesn't stay alive spamming
+    # "ignoring byte stream with topic 'lk.agent.session'" after the call ends.
+    await ctx.room.disconnect()
 
 
 if __name__ == "__main__":
     cli.run_app(
         WorkerOptions(
             entrypoint_fnc=entrypoint,
+            agent_name="imagica-priya",  # must match AGENT_NAME in main.py
         )
     )
