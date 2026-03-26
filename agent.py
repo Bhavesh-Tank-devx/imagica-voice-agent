@@ -3,6 +3,7 @@ import asyncio
 import json
 import logging
 import os
+import time
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -30,6 +31,26 @@ from retry import RETRYABLE_DISPOSITIONS, MAX_ATTEMPTS, schedule_retry
 
 load_dotenv()
 logger = logging.getLogger("imagica-agent")
+
+
+def _extract_text(msg) -> str:
+    """Pull plain text from a livekit ChatMessage or speech event object.
+    Handles both string content and list-of-chunks content shapes."""
+    try:
+        content = msg.content if hasattr(msg, "content") else msg
+        if isinstance(content, str):
+            return content.strip()
+        if isinstance(content, list):
+            parts = []
+            for item in content:
+                if isinstance(item, str):
+                    parts.append(item)
+                elif hasattr(item, "text") and item.text:
+                    parts.append(item.text)
+            return " ".join(parts).strip()
+    except Exception:
+        pass
+    return ""
 
 PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
 LOCATION = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
@@ -60,15 +81,27 @@ Your job is to gently remind them, understand their concern, and help them compl
 1. **Opening** — Greet warmly, introduce yourself, mention the cart naturally (not robotically).
 2. **Listen** — Ask why they didn't complete. Let them talk.
 3. **Address concern** — Price issue? Offer discount (max 10%). Busy? Schedule callback. Confused? Send link.
-4. **Close** — The moment customer says yes (any form: "haan", "theek hai", "okay", "sure", "book kar lunga") — call send_booking_link() IMMEDIATELY, before saying anything else. Do not wait to finish your sentence first.
-5. **Exit gracefully** — If they say no firmly, mark not interested and wish them well. Never be pushy.
+4. **Close** — The moment customer gives ANY positive or non-negative signal — "haan", "theek hai", "okay", "sure", "book kar lunga", "I'll check it out", "bhej do", "main sochti hoon", "later dekhta hoon" — call send_booking_link() IMMEDIATELY before saying anything else. When in doubt, send the link. The only reason NOT to send the link is if the customer explicitly says NO.
+5. **Exit gracefully** — Only call mark_not_interested() if customer says a clear "nahi chahiye", "cancel karo", "not interested", or "don't call again". Ambiguous responses always get the link first.
 
 ## Tone Rules
-- Mix Hindi and English naturally: "Arey Rahul bhai, koi baat nahi, main help karti hoon!"
+- Mix Hindi and English naturally: "Arey {cart['customer_name']} ji, koi baat nahi, main help karti hoon!"
 - Use "aap" (respectful) for the customer, never "tum"
 - Be warm but not fake. Don't over-apologize.
 - Keep sentences short. Real conversations have pauses.
 - Never read out URLs — say "main aapko link bhej deti hoon SMS pe"
+
+## Hindi Gender Rules (STRICT — never break these)
+You are a woman. Always use feminine verb forms in Hindi. Never use masculine -a endings for yourself.
+Correct feminine forms to always use:
+- "main bol RAHI hoon" (never "raha hoon")
+- "main karti hoon" (never "karta hoon")
+- "main samajhti hoon" (never "samajhta hoon")
+- "main chahti hoon" (never "chahta hoon")
+- "main bhej RAHI hoon" (never "bhej raha hoon")
+- "main call kar RAHI thi" (never "kar raha tha")
+- Any verb ending in -aa or -a when referring to yourself must be changed to -i or -ee
+If you catch yourself about to say a masculine form, correct it immediately.
 
 ## Tools You Have
 - send_booking_link → When customer is ready to pay
@@ -110,8 +143,11 @@ class PriyaAgent(Agent):
     @function_tool
     async def send_booking_link(self) -> str:
         """Send the booking link to the customer via SMS so they can complete the purchase.
-        Call this IMMEDIATELY the moment customer verbally agrees to book — do not delay.
-        Any positive signal counts: 'haan', 'okay', 'theek hai', 'sure', 'book kar lunga', 'send the link'."""
+        Call this IMMEDIATELY the moment customer shows ANY positive or exploratory signal — do not delay.
+        Triggers: 'haan', 'okay', 'theek hai', 'sure', 'book kar lunga', 'send the link',
+        'I will check', 'main dekhti/dekhta hoon', 'bhej do', 'check kar leti/leta hoon',
+        'I'll look at it', 'send kar do', 'share kar do', 'later dekhta hoon'.
+        Even 'maybe' or 'let me think' counts — send the link so they have it."""
         link = self.cart["booking_link"]
         phone = self.cart["customer_phone"]
         logger.info(f"[MOCK] Sending booking link to {phone}: {link}")
@@ -208,12 +244,9 @@ async def entrypoint(ctx: JobContext):
         project=PROJECT_ID,
         location=LOCATION,
         # Voice options: Puck, Charon, Kore, Fenrir, Aoede
+        # Puck has slightly lower first-token latency than Aoede on us-central1
         voice="Aoede",
-        temperature=0.8,
-        # Reduce false VAD triggers from phone line echo/sidetone.
-        # On SIP calls, Priya's audio leaks back through the phone mic and can be
-        # mistaken for the user speaking, causing mid-sentence interruptions.
-        input_audio_noise_suppression="NEAR_FIELD",
+        temperature=0.6,  # lower = faster, more focused responses; was 0.8
     )
 
     session = AgentSession(llm=model)
@@ -236,10 +269,39 @@ async def entrypoint(ctx: JobContext):
     def on_session_close():
         call_ended.set()
 
+    # --- Transcript capture ---
+    # user_speech_committed fires after Gemini transcribes the customer's utterance.
+    # agent_speech_committed fires after Priya finishes a response turn.
+    # Native audio Gemini Live may not produce agent text unless output_audio_transcription
+    # is enabled in the model config — in that case agent entries will be empty strings.
+    transcript_lines: list[dict] = []
+
+    @session.on("user_speech_committed")
+    def on_user_speech(msg):
+        text = _extract_text(msg)
+        if text:
+            entry = {"role": "user", "text": text, "ts": datetime.now().isoformat()}
+            transcript_lines.append(entry)
+            logger.info(f"[TRANSCRIPT] Customer: {text}")
+
+    @session.on("agent_speech_committed")
+    def on_agent_speech(msg):
+        text = _extract_text(msg)
+        if text:
+            entry = {"role": "agent", "text": text, "ts": datetime.now().isoformat()}
+            transcript_lines.append(entry)
+            logger.info(f"[TRANSCRIPT] Priya: {text}")
+
+    call_start = time.time()
     await session.start(room=ctx.room, agent=priya)
-    logger.info(f"Priya is live for {cart['customer_name']}! Waiting for conversation...")
+    logger.info(
+        f"[CALL START] cart={cart['cart_id']} customer={cart['customer_name']} "
+        f"phone={cart['customer_phone']} attempt={cart.get('attempt_number', 1)}"
+    )
 
     await call_ended.wait()
+
+    duration_sec = int(time.time() - call_start)
 
     summary_map = {
         "BOOKED": "Customer agreed to book; booking link sent via SMS.",
@@ -249,15 +311,30 @@ async def entrypoint(ctx: JobContext):
         "NO_ANSWER": "Call ended with no conclusive outcome.",
     }
     summary = summary_map.get(priya.disposition, "Call ended.")
+
+    logger.info(
+        f"[CALL END] cart={cart['cart_id']} | disposition={priya.disposition} | "
+        f"duration={duration_sec}s | discount={priya.discount}% | "
+        f"transcript_turns={len(transcript_lines)} | attempt={cart.get('attempt_number', 1)}"
+    )
+
+    if transcript_lines:
+        logger.info("[TRANSCRIPT FULL]")
+        for line in transcript_lines:
+            speaker = "Priya   " if line["role"] == "agent" else "Customer"
+            logger.info(f"  {speaker} [{line['ts']}]: {line['text']}")
+    else:
+        logger.info("[TRANSCRIPT] No transcript captured (native audio model — agent text not transcribed)")
+
     log_call(
         cart=cart,
         disposition=priya.disposition,
-        transcript=[],  # transcript capture requires speech events — future step
+        transcript=transcript_lines,
         summary=summary,
         discount=priya.discount,
         called_at=priya.called_at,
     )
-    logger.info(f"Call logged: cart_id={cart['cart_id']} disposition={priya.disposition}")
+    logger.info(f"[CRM WRITE] cart_id={cart['cart_id']} disposition={priya.disposition} saved to SQLite")
 
     # Retry logic: hand off to FastAPI server which holds the sleep in its own event loop.
     # asyncio.create_task would be killed when this subprocess exits — don't use it here.
