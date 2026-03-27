@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imagicaa Priya — Dev Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+
+  header { background: #1a1d2e; border-bottom: 1px solid #2d3148; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+  header .logo { font-size: 22px; font-weight: 700; color: #fff; }
+  header .badge { background: #6366f1; color: #fff; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; display: grid; gap: 28px; }
+
+  .card { background: #1a1d2e; border: 1px solid #2d3148; border-radius: 12px; padding: 24px; }
+  .card-title { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 20px; }
+
+  label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; }
+  input, select { width: 100%; background: #0f1117; border: 1px solid #2d3148; border-radius: 8px; color: #e2e8f0; font-size: 14px; padding: 9px 12px; outline: none; transition: border-color 0.15s; }
+  input:focus, select:focus { border-color: #6366f1; }
+  input::placeholder { color: #475569; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; }
+
+  /* Mode toggle */
+  .mode-toggle { display: flex; gap: 8px; margin-top: 4px; }
+  .mode-btn { flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #2d3148; background: transparent; color: #94a3b8; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: center; }
+  .mode-btn.active { border-color: #6366f1; background: rgba(99,102,241,0.12); color: #c7d2fe; }
+  .mode-btn:hover:not(.active) { border-color: #475569; color: #e2e8f0; }
+
+  /* Tickets table */
+  .tickets-header { display: grid; grid-template-columns: 2fr 100px 120px 36px; gap: 8px; font-size: 12px; color: #64748b; padding: 0 0 6px; border-bottom: 1px solid #2d3148; margin-bottom: 8px; }
+  .ticket-row { display: grid; grid-template-columns: 2fr 100px 120px 36px; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .btn-icon { width: 36px; height: 36px; border-radius: 6px; border: 1px solid #2d3148; background: transparent; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.15s; flex-shrink: 0; }
+  .btn-icon:hover { border-color: #ef4444; color: #ef4444; }
+  .btn-add { margin-top: 10px; background: transparent; border: 1px dashed #2d3148; color: #6366f1; border-radius: 8px; padding: 8px; width: 100%; cursor: pointer; font-size: 13px; transition: all 0.15s; }
+  .btn-add:hover { border-color: #6366f1; background: rgba(99,102,241,0.06); }
+
+  /* Submit */
+  .btn-dispatch { width: 100%; padding: 12px; background: #6366f1; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.15s; margin-top: 20px; }
+  .btn-dispatch:hover { background: #5254cc; }
+  .btn-dispatch:disabled { background: #2d3148; color: #475569; cursor: not-allowed; }
+
+  /* Response card */
+  #response-card { display: none; }
+  .response-inner { background: #0f1117; border-radius: 8px; padding: 16px; font-size: 13px; }
+  .response-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1e2235; }
+  .response-row:last-child { border-bottom: none; }
+  .response-label { color: #64748b; }
+  .response-value { color: #e2e8f0; font-family: monospace; font-size: 12px; }
+  .chip { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+  .chip-browser { background: rgba(16,185,129,0.15); color: #34d399; }
+  .chip-phone { background: rgba(239,68,68,0.15); color: #f87171; }
+
+  .join-btn { display: block; margin-top: 14px; padding: 10px 16px; background: #10b981; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; text-align: center; }
+  .join-btn:hover { background: #059669; }
+
+  .token-box { margin-top: 10px; background: #0a0c14; border: 1px solid #2d3148; border-radius: 6px; padding: 10px 12px; font-family: monospace; font-size: 11px; color: #64748b; word-break: break-all; line-height: 1.6; }
+
+  /* Call log table */
+  .calls-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .btn-refresh { padding: 6px 14px; background: transparent; border: 1px solid #2d3148; border-radius: 6px; color: #94a3b8; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .btn-refresh:hover { border-color: #6366f1; color: #c7d2fe; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: #64748b; font-weight: 500; padding: 8px 10px; border-bottom: 1px solid #2d3148; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 10px 10px; border-bottom: 1px solid #1e2235; color: #e2e8f0; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(99,102,241,0.04); }
+
+  .disp { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .disp-INTERESTED_LINK_SENT { background: rgba(16,185,129,0.15); color: #34d399; }
+  .disp-CONVERTED { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+  .disp-CALLBACK_SCHEDULED { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .disp-NOT_INTERESTED { background: rgba(239,68,68,0.12); color: #f87171; }
+  .disp-NO_ANSWER { background: rgba(100,116,139,0.2); color: #94a3b8; }
+  .disp-TRANSFERRED_TO_HUMAN { background: rgba(139,92,246,0.15); color: #c4b5fd; }
+  .disp-UNREACHABLE { background: rgba(239,68,68,0.08); color: #94a3b8; }
+  .disp-default { background: rgba(100,116,139,0.15); color: #94a3b8; }
+
+  .empty { text-align: center; color: #475569; padding: 32px; }
+
+  .err { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 12px 16px; color: #f87171; font-size: 13px; margin-top: 12px; display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Imagicaa Priya</div>
+  <div class="badge">Dev Dashboard</div>
+</header>
+
+<div class="container">
+
+  <!-- Dispatch Form -->
+  <div class="card">
+    <div class="card-title">Dispatch a Call</div>
+
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="field">
+        <label>Customer Name</label>
+        <input id="f-name" type="text" placeholder="e.g. Neha Joshi" value="Neha Joshi">
+      </div>
+      <div class="field">
+        <label>Customer Phone (E.164)</label>
+        <input id="f-phone" type="text" placeholder="+919913874598" value="+919913874598">
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="field">
+        <label>Visit Date</label>
+        <input id="f-date" type="text" placeholder="e.g. 12 April 2026" value="12 April 2026">
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="field">
+        <label>Attempt Number</label>
+        <select id="f-attempt">
+          <option value="1" selected>1 (first call)</option>
+          <option value="2">2 (retry)</option>
+          <option value="3">3 (final attempt)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Mode</label>
+        <div class="mode-toggle">
+          <button class="mode-btn active" data-mode="browser" onclick="setMode('browser')">
+            Browser (LiveKit)
+          </button>
+          <button class="mode-btn" data-mode="phone" onclick="setMode('phone')">
+            Phone (SIP)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tickets -->
+    <label style="margin-bottom:10px">Tickets</label>
+    <div class="tickets-header">
+      <div>Type</div><div>Qty</div><div>Price / unit (₹)</div><div></div>
+    </div>
+    <div id="tickets-container">
+      <!-- rows injected by JS -->
+    </div>
+    <button class="btn-add" onclick="addTicketRow()">+ Add ticket type</button>
+
+    <div class="err" id="err-box"></div>
+
+    <button class="btn-dispatch" id="dispatch-btn" onclick="dispatch()">Dispatch Priya</button>
+  </div>
+
+  <!-- Response -->
+  <div class="card" id="response-card">
+    <div class="card-title">Dispatch Result</div>
+    <div class="response-inner" id="response-inner"></div>
+  </div>
+
+  <!-- Call Log -->
+  <div class="card">
+    <div class="calls-header">
+      <div class="card-title" style="margin-bottom:0">Recent Calls</div>
+      <button class="btn-refresh" onclick="loadCalls()">Refresh</button>
+    </div>
+    <div id="calls-table-wrap">
+      <div class="empty">Loading…</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let selectedMode = 'browser';
+
+function setMode(m) {
+  selectedMode = m;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+}
+
+// --- Tickets ---
+const DEFAULT_TICKETS = [
+  { type: 'Adult', qty: 2, price: 1499 },
+  { type: 'Child', qty: 2, price: 899 },
+];
+
+function addTicketRow(type = '', qty = 1, price = 999) {
+  const container = document.getElementById('tickets-container');
+  const row = document.createElement('div');
+  row.className = 'ticket-row';
+  row.innerHTML = `
+    <input type="text" placeholder="Adult / Child / Senior" value="${type}">
+    <input type="number" min="1" max="20" value="${qty}" style="text-align:center">
+    <input type="number" min="0" value="${price}">
+    <button class="btn-icon" onclick="this.closest('.ticket-row').remove()" title="Remove">×</button>
+  `;
+  container.appendChild(row);
+}
+
+function getTickets() {
+  const rows = document.querySelectorAll('.ticket-row');
+  return Array.from(rows).map(r => {
+    const inputs = r.querySelectorAll('input');
+    return { type: inputs[0].value.trim(), quantity: parseInt(inputs[1].value), price_per_unit: parseInt(inputs[2].value) };
+  }).filter(t => t.type);
+}
+
+function computeTotal(tickets) {
+  return tickets.reduce((s, t) => s + t.quantity * t.price_per_unit, 0);
+}
+
+function genCartId(name) {
+  const slug = name.toUpperCase().replace(/\s+/g, '-').replace(/[^A-Z0-9-]/g, '').slice(0, 8);
+  const ts = Date.now().toString().slice(-5);
+  return `CART-${slug}-${ts}`;
+}
+
+// --- Dispatch ---
+async function dispatch() {
+  const btn = document.getElementById('dispatch-btn');
+  const errBox = document.getElementById('err-box');
+  errBox.style.display = 'none';
+
+  const name = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const date = document.getElementById('f-date').value.trim();
+  const cartId = genCartId(name || 'ANON');
+  const attempt = parseInt(document.getElementById('f-attempt').value);
+  const tickets = getTickets();
+
+  if (!name || !phone || !date || tickets.length === 0) {
+    errBox.textContent = 'Please fill in name, phone, visit date, and at least one ticket.';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  const payload = {
+    customer_name: name,
+    customer_phone: phone,
+    cart_id: cartId,
+    visit_date: date,
+    tickets,
+    total_amount: computeTotal(tickets),
+    attempt_number: attempt,
+    mode: selectedMode,
+  };
+
+  btn.disabled = true;
+  btn.textContent = 'Dispatching…';
+
+  try {
+    const resp = await fetch('/webhook/cart-abandoned', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      errBox.textContent = data.detail || JSON.stringify(data);
+      errBox.style.display = 'block';
+      return;
+    }
+
+    await showResponse(data, payload.total_amount);
+    loadCalls();
+  } catch (e) {
+    errBox.textContent = 'Network error: ' + e.message;
+    errBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Dispatch Priya';
+  }
+}
+
+async function showResponse(data, totalAmount) {
+  const card = document.getElementById('response-card');
+  const inner = document.getElementById('response-inner');
+  card.style.display = 'block';
+
+  if (data.status === 'suppressed') {
+    inner.innerHTML = `<div class="response-row"><span class="response-label">Status</span><span class="response-value" style="color:#fbbf24">Suppressed — ${data.reason}</span></div>`;
+    card.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  const modeChip = data.mode === 'phone'
+    ? '<span class="chip chip-phone">Phone / SIP</span>'
+    : '<span class="chip chip-browser">Browser / LiveKit</span>';
+
+  let html = `
+    <div class="response-row"><span class="response-label">Status</span><span class="response-value" style="color:#34d399">✓ dispatched</span></div>
+    <div class="response-row"><span class="response-label">Room</span><span class="response-value">${data.room}</span></div>
+    <div class="response-row"><span class="response-label">Cart ID</span><span class="response-value">${data.cart_id}</span></div>
+    <div class="response-row"><span class="response-label">Customer</span><span class="response-value">${data.customer}</span></div>
+    <div class="response-row"><span class="response-label">Total</span><span class="response-value">₹${totalAmount.toLocaleString('en-IN')}</span></div>
+    <div class="response-row"><span class="response-label">Mode</span><span class="response-value">${modeChip}</span></div>
+    <div class="response-row"><span class="response-label">Dispatch ID</span><span class="response-value">${data.dispatch_id || '—'}</span></div>
+  `;
+
+  if (data.mode !== 'phone') {
+    // Fetch a token so user can join immediately
+    try {
+      const tr = await fetch(`/token?room=${encodeURIComponent(data.room)}`);
+      const td = await tr.json();
+      if (!tr.ok) {
+        html += `<div style="color:#f87171;font-size:13px;margin-top:12px;padding:10px;background:rgba(239,68,68,0.08);border-radius:6px">Token error: ${td.detail || JSON.stringify(td)}</div>`;
+      } else {
+        // agents-playground reads liveKitUrl+token from the hash fragment.
+        // token is base64url — no encoding needed. liveKitUrl needs encodeURIComponent.
+        const lkUrlEnc = encodeURIComponent(td.livekit_url);
+        const playgroundUrl = `https://agents-playground.livekit.io/#cam=0&mic=1&screen=1&video=0&audio=1&chat=1&theme_color=cyan&liveKitUrl=${lkUrlEnc}&token=${td.token}`;
+        const tokenId = 'token-' + Date.now();
+        const lkUrlId = 'lkurl-' + Date.now();
+        html += `
+          <div class="response-row" style="margin-top:10px">
+            <span class="response-label">LiveKit URL</span>
+            <span style="display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end">
+              <span class="response-value" id="${lkUrlId}" style="color:#34d399">${td.livekit_url}</span>
+              <button onclick="copyToken('${lkUrlId}')" id="copy-btn-${lkUrlId}" style="background:transparent;border:1px solid #2d3148;border-radius:5px;color:#94a3b8;font-size:11px;padding:3px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0" onmouseenter="this.style.borderColor='#6366f1';this.style.color='#c7d2fe'" onmouseleave="this.style.borderColor='#2d3148';this.style.color='#94a3b8'">Copy</button>
+            </span>
+          </div>
+          <a class="join-btn" href="${playgroundUrl}" target="_blank" rel="noopener">
+            Join as Participant (opens LiveKit Agents Playground) →
+          </a>
+          <div class="token-box" style="position:relative;margin-top:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong style="color:#94a3b8">Token</strong>
+              <button onclick="copyToken('${tokenId}')" id="copy-btn-${tokenId}" style="background:transparent;border:1px solid #2d3148;border-radius:5px;color:#94a3b8;font-size:11px;padding:3px 10px;cursor:pointer;" onmouseenter="this.style.borderColor='#6366f1';this.style.color='#c7d2fe'" onmouseleave="this.style.borderColor='#2d3148';this.style.color='#94a3b8'">Copy</button>
+            </div>
+            <span id="${tokenId}" style="word-break:break-all;line-height:1.6">${td.token}</span>
+          </div>
+        `;
+      }
+    } catch (e) {
+      html += `<div style="color:#f87171;font-size:13px;margin-top:12px">Could not fetch join token: ${e.message}</div>`;
+    }
+  }
+
+  inner.innerHTML = html;
+  card.scrollIntoView({ behavior: 'smooth' });
+}
+
+function copyToken(id) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn-' + id);
+    btn.textContent = 'Copied!';
+    btn.style.color = '#34d399';
+    btn.style.borderColor = '#34d399';
+    setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; btn.style.borderColor = ''; }, 2000);
+  });
+}
+
+// --- Calls table ---
+function dispChip(d) {
+  const cls = `disp disp-${d}` in document.styleSheets ? `disp disp-${d}` : 'disp disp-default';
+  return `<span class="disp disp-${d}">${d || '—'}</span>`;
+}
+
+async function loadCalls() {
+  const wrap = document.getElementById('calls-table-wrap');
+  try {
+    const r = await fetch('/calls?limit=20');
+    const data = await r.json();
+    const calls = data.calls || [];
+
+    if (!calls.length) {
+      wrap.innerHTML = '<div class="empty">No calls yet. Dispatch Priya above.</div>';
+      return;
+    }
+
+    let rows = calls.map(c => {
+      const ts = c.called_at ? new Date(c.called_at).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+      const lat = c.latency_avg_ms ? `${c.latency_avg_ms}ms` : (c.first_response_ms ? `${c.first_response_ms}ms` : '—');
+      return `<tr>
+        <td>${c.id}</td>
+        <td>${escHtml(c.customer || '—')}</td>
+        <td>${escHtml(c.cart_id || '—')}</td>
+        <td>${dispChip(c.disposition)}</td>
+        <td>${c.attempt || 1}</td>
+        <td>${c.transcript_turns || 0}</td>
+        <td>${lat}</td>
+        <td style="color:#64748b;font-size:12px">${ts}</td>
+      </tr>`;
+    }).join('');
+
+    wrap.innerHTML = `<table>
+      <thead><tr>
+        <th>#</th><th>Customer</th><th>Cart ID</th><th>Disposition</th>
+        <th>Attempt</th><th>Turns</th><th>Avg Latency</th><th>Called At</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  } catch (e) {
+    wrap.innerHTML = `<div class="empty" style="color:#f87171">Failed to load: ${e.message}</div>`;
+  }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Init
+DEFAULT_TICKETS.forEach(t => addTicketRow(t.type, t.qty, t.price));
+loadCalls();
+</script>
+</body>
+</html>
