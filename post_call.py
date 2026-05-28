@@ -77,6 +77,15 @@ def init_db():
         "CREATE INDEX IF NOT EXISTS idx_queue_priority "
         "ON call_queue(status, cart_value DESC, scheduled_at)"
     )
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS call_sessions (
+            conversation_id TEXT PRIMARY KEY,
+            cart_data       TEXT NOT NULL,   -- JSON cart dict
+            initiated_at    TEXT NOT NULL,
+            tool_calls      TEXT DEFAULT '[]',
+            discount        REAL DEFAULT 0
+        )
+    """)
     conn.commit()
     _migrate_db(conn)
     conn.close()
@@ -415,3 +424,74 @@ def get_metrics() -> dict:
             for r in attempt_rows
         ],
     }
+
+
+# ---------------------------------------------------------------------------
+# Call session persistence (survives server restarts)
+# ---------------------------------------------------------------------------
+
+def save_session(conversation_id: str, cart: dict, initiated_at: str) -> None:
+    """Persist a new call session to SQLite when the call is initiated."""
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        """
+        INSERT OR REPLACE INTO call_sessions
+            (conversation_id, cart_data, initiated_at, tool_calls, discount)
+        VALUES (?, ?, ?, '[]', 0)
+        """,
+        (conversation_id, json.dumps(cart), initiated_at),
+    )
+    conn.commit()
+    conn.close()
+
+
+def append_tool_call(conversation_id: str, tool_entry: dict) -> None:
+    """Add a tool call record to an existing session."""
+    conn = sqlite3.connect(DB_PATH)
+    row = conn.execute(
+        "SELECT tool_calls, discount FROM call_sessions WHERE conversation_id = ?",
+        (conversation_id,),
+    ).fetchone()
+    if not row:
+        conn.close()
+        return
+    tool_calls = json.loads(row[0])
+    tool_calls.append(tool_entry)
+    discount = tool_entry.get("discount_percent", row[1])
+    conn.execute(
+        "UPDATE call_sessions SET tool_calls = ?, discount = ? WHERE conversation_id = ?",
+        (json.dumps(tool_calls), discount, conversation_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_session(conversation_id: str) -> dict | None:
+    """Load a session dict; returns None if not found."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    row = conn.execute(
+        "SELECT * FROM call_sessions WHERE conversation_id = ?",
+        (conversation_id,),
+    ).fetchone()
+    conn.close()
+    if not row:
+        return None
+    return {
+        "cart": json.loads(row["cart_data"]),
+        "initiated_at": row["initiated_at"],
+        "tool_calls": json.loads(row["tool_calls"]),
+        "discount": row["discount"],
+    }
+
+
+def delete_session(conversation_id: str) -> None:
+    """Remove a session after the call has been logged."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        "DELETE FROM call_sessions WHERE conversation_id = ?",
+        (conversation_id,),
+    )
+    conn.commit()
+    conn.close()
