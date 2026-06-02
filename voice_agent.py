@@ -17,6 +17,7 @@ import base64
 import json
 import logging
 import os
+import re
 import time
 from datetime import datetime
 
@@ -25,14 +26,19 @@ from dotenv import load_dotenv
 from fastapi import WebSocket
 
 from agent import build_system_prompt, _detect_language
+from kaya_branches import get_closest_branches as _kaya_branch_lookup
+from kaya_prompt import build_kaya_system_prompt
 from post_call import (
     DISPOSITION_NO_ANSWER,
     DISPOSITION_INTERESTED_LINK_SENT,
     DISPOSITION_CALLBACK_SCHEDULED,
     DISPOSITION_NOT_INTERESTED,
     DISPOSITION_TRANSFERRED,
+    DISPOSITION_CONVERTED,
     DISPOSITION_UNREACHABLE,
+    DISPOSITION_CALL_COMPLETED_NO_OUTCOME,
     log_call,
+    log_kaya_booking,
     init_db,
 )
 from retry import RETRYABLE_DISPOSITIONS, MAX_ATTEMPTS, schedule_retry
@@ -43,6 +49,7 @@ logger = logging.getLogger("imagica-voice-agent")
 
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 ELEVENLABS_AGENT_ID = os.getenv("ELEVENLABS_AGENT_ID", "")
+ELEVENLABS_KAYA_AGENT_ID = os.getenv("ELEVENLABS_KAYA_AGENT_ID", ELEVENLABS_AGENT_ID)
 ELEVENLABS_WSS_URL = "wss://api.elevenlabs.io/v1/convai/conversation"
 
 # Twilio sends 8 kHz µ-law; ElevenLabs expects 16 kHz PCM 16-bit mono.
@@ -70,6 +77,75 @@ def pcm16k_to_mulaw(pcm_bytes: bytes) -> bytes:
         pcm_bytes, SAMPLE_WIDTH, 1, ELEVENLABS_SAMPLE_RATE, TWILIO_SAMPLE_RATE, None
     )
     return audioop.lin2ulaw(pcm_8k, SAMPLE_WIDTH)
+
+
+# ---------------------------------------------------------------------------
+# Email cleanup helpers
+# ---------------------------------------------------------------------------
+
+# Applied in order after stripping all spaces (so patterns never need \s)
+_DOMAIN_SUBS: list[tuple[str, str]] = [
+    # "at<provider>" run together → @<provider>
+    (r"at(gmail|yahoo|hotmail|outlook|icloud|rediff|live)", r"@\1"),
+    # "dot<ext>" run together → .<ext>
+    (r"dot(com|in|co|net|org|io)", r".\1"),
+]
+
+
+def _normalize_email(raw: str) -> str:
+    """Fix common speech-to-text transcription errors in a spoken email address."""
+    s = raw.lower().strip().replace(" ", "")
+    for pattern, replacement in _DOMAIN_SUBS:
+        s = re.sub(pattern, replacement, s)
+    if s.count("@") != 1 or "." not in s.split("@")[-1]:
+        return raw  # too broken to fix — return original, let agent re-ask
+    return s
+
+
+def _levenshtein(a: str, b: str) -> int:
+    """Standard Wagner-Fischer edit distance."""
+    m, n = len(a), len(b)
+    dp = list(range(n + 1))
+    for i in range(1, m + 1):
+        prev, dp[0] = dp[0], i
+        for j in range(1, n + 1):
+            prev, dp[j] = dp[j], prev if a[i - 1] == b[j - 1] else 1 + min(prev, dp[j], dp[j - 1])
+    return dp[n]
+
+
+def _fuzzy_correct_email(email: str, first_name: str, last_name: str) -> str:
+    """
+    If the email username is very close to the customer's name (Levenshtein ≤ 3),
+    replace it with the name-derived spelling.
+    Catches ASR substitutions like 'e'→'t' (bhaveshreank → bhaveshtank)
+    and 'p'→'t' / 'g'→'q' (gladsponsegueira → gladstonsequeira).
+    """
+    if "@" not in email:
+        return email
+    username, domain = email.split("@", 1)
+
+    candidates = [
+        (first_name + last_name).lower(),
+        (first_name + "." + last_name).lower(),
+        (first_name + "_" + last_name).lower(),
+    ]
+    if first_name:
+        candidates.append((first_name[0] + last_name).lower())
+    candidates = [c for c in candidates if c]
+
+    best_dist, best_candidate = len(username) + 1, None
+    for candidate in candidates:
+        dist = _levenshtein(username.lower(), candidate)
+        if dist < best_dist:
+            best_dist, best_candidate = dist, candidate
+
+    if best_dist <= 3 and best_candidate:
+        corrected = best_candidate + "@" + domain
+        if corrected != email:
+            logger.info(f"[EMAIL] Fuzzy-corrected '{email}' → '{corrected}' (edit_dist={best_dist})")
+        return corrected
+
+    return email
 
 
 # ---------------------------------------------------------------------------
@@ -152,6 +228,53 @@ async def execute_tool(
             "Then end the conversation."
         )
 
+    # --- Kaya-specific tools ---
+
+    if tool_name == "get_closest_branches":
+        pincode = parameters.get("pincode", "")
+        city = parameters.get("city", "")
+        state["tool_calls"].append({"tool": tool_name, "ts": ts, "args": parameters})
+        result = _kaya_branch_lookup(pincode=pincode, city=city)
+        logger.info(f"[TOOL] get_closest_branches → city={result.get('city')} branches={result.get('branches')}")
+        return result["message"]
+
+    if tool_name == "book_appointment":
+        state["tool_calls"].append({"tool": tool_name, "ts": ts, "args": parameters})
+        try:
+            first_name = parameters.get("first_name", "")
+            last_name = parameters.get("last_name", "")
+            raw_email = parameters.get("email", "")
+            email = _fuzzy_correct_email(_normalize_email(raw_email), first_name, last_name)
+            booking_id = log_kaya_booking(
+                cart_id=cart.get("cart_id", "unknown"),
+                customer_phone=phone,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                pincode=parameters.get("pincode", ""),
+                branch_name=parameters.get("branch_name", ""),
+                appointment_date=parameters.get("appointment_date", ""),
+                appointment_time=parameters.get("appointment_time", ""),
+                dob=parameters.get("dob", ""),
+                city=parameters.get("city", ""),
+                concern_summary=parameters.get("concern_summary", ""),
+            )
+            state["disposition"] = DISPOSITION_CONVERTED
+            logger.info(f"[TOOL] book_appointment → booking_id={booking_id} branch={parameters.get('branch_name')}")
+            return (
+                f"Appointment confirmed! Booking ID: {booking_id}. "
+                f"Branch: {parameters.get('branch_name')}. "
+                f"Date: {parameters.get('appointment_date')} at {parameters.get('appointment_time')}."
+            )
+        except Exception as exc:
+            logger.error(f"[TOOL] book_appointment error: {exc}")
+            return f"Booking failed due to a technical issue: {exc}"
+
+    if tool_name == "end_call":
+        state["tool_calls"].append({"tool": tool_name, "ts": ts, "args": parameters})
+        logger.info(f"[TOOL] end_call → disposition={state['disposition']}")
+        return "Call ended."
+
     logger.warning(f"[TOOL] Unknown tool: {tool_name}")
     return f"Unknown tool: {tool_name}"
 
@@ -160,19 +283,24 @@ async def execute_tool(
 # Main handler
 # ---------------------------------------------------------------------------
 
-async def media_stream_handler(websocket: WebSocket, call_sid: str, cart: dict):
+async def media_stream_handler(
+    websocket: WebSocket,
+    call_sid: str,
+    cart: dict,
+    agent_type: str = "imagica",
+    preread: list | None = None,
+):
     """
     WebSocket handler for Twilio Media Streams.
-
-    Mount this in your FastAPI app:
-        @app.websocket("/twilio/media-stream")
-        async def ws_endpoint(websocket: WebSocket, call_sid: str = Query(...)):
-            cart = get_cart_for_call(call_sid)   # your lookup here
-            await media_stream_handler(websocket, call_sid, cart)
+    Caller must already have called websocket.accept() and pass any pre-read
+    messages (those consumed while finding the "start" event) via preread.
     """
     init_db()
-    await websocket.accept()
-    logger.info(f"[WS] Twilio connected — call_sid={call_sid} cart_id={cart.get('cart_id')}")
+    # websocket is already accepted by the caller in main.py
+    logger.info(
+        f"[WS] Twilio connected — call_sid={call_sid} "
+        f"cart_id={cart.get('cart_id')} agent_type={agent_type}"
+    )
 
     # Mutable state shared across the three bridge coroutines
     state: dict = {
@@ -185,35 +313,47 @@ async def media_stream_handler(websocket: WebSocket, call_sid: str, cart: dict):
         "first_response_ms": None,
         "call_connected_at": datetime.now().isoformat(),
         "call_start": time.time(),
-        # VAD latency: timestamp when user last stopped speaking
+        "agent_type": agent_type,
         "_user_stopped_at": 0.0,
     }
 
     stream_sid: list[str] = [""]  # Twilio stream SID (captured from 'start' event)
 
-    # Build ElevenLabs session init payload with dynamic system prompt
-    session_init = {
-        "type": "conversation_initiation_client_data",
-        "conversation_config_override": {
-            "agent": {
-                "prompt": {
-                    "prompt": build_system_prompt(cart)
-                },
-                "first_message": (
-                    f"Hello, {cart['customer_name']} ji! "
-                    "Main Priya bol rahi hoon, Imagicaa se."
-                ),
+    if agent_type == "kaya":
+        call_type = cart.get("call_type", "OUTBOUND")
+        customer_name = cart.get("customer_name", "")
+        first_message = (
+            f"Hello, am I speaking with {customer_name}? "
+            "Hi, this is Priya calling from Kaya Clinic. "
+            "You recently filled out a form on our website. Is this a good time to talk?"
+            if call_type == "OUTBOUND"
+            else "Thank you for calling Kaya Clinic. This is Priya. How may I help you today?"
+        )
+        session_init = {
+            "type": "conversation_initiation_client_data",
+            "conversation_config_override": {
+                "tts": {"output_format": "pcm_16000"},
             },
-            "tts": {
-                "output_format": "pcm_16000",
+            "dynamic_variables": {
+                "customer_phone": cart.get("customer_phone", ""),
+                "customer_name": cart.get("customer_name", ""),
+                "city": cart.get("city", ""),
+                "call_type": call_type,
             },
-        },
-    }
+        }
+        el_url = f"{ELEVENLABS_WSS_URL}?agent_id={ELEVENLABS_KAYA_AGENT_ID}"
+        if not ELEVENLABS_KAYA_AGENT_ID:
+            logger.warning("[WS] ELEVENLABS_KAYA_AGENT_ID not set — falling back to ELEVENLABS_AGENT_ID")
+    else:
+        session_init = {
+            "type": "conversation_initiation_client_data",
+            "conversation_config_override": {
+                "tts": {"output_format": "pcm_16000"},
+            },
+        }
+        el_url = f"{ELEVENLABS_WSS_URL}?agent_id={ELEVENLABS_AGENT_ID}"
 
-    el_headers = {
-        "xi-api-key": ELEVENLABS_API_KEY,
-    }
-    el_url = f"{ELEVENLABS_WSS_URL}?agent_id={ELEVENLABS_AGENT_ID}"
+    el_headers = {"xi-api-key": ELEVENLABS_API_KEY}
 
     try:
         async with websockets.connect(el_url, additional_headers=el_headers) as el_ws:
@@ -226,6 +366,21 @@ async def media_stream_handler(websocket: WebSocket, call_sid: str, cart: dict):
             # Task 1 — Twilio → ElevenLabs: receive Twilio audio, forward to EL
             # ------------------------------------------------------------------
             async def twilio_to_elevenlabs():
+                # Replay messages that were consumed while looking up the cart
+                messages_iter = iter(preread or [])
+                for raw in messages_iter:
+                    data = json.loads(raw)
+                    event = data.get("event")
+                    if event == "start":
+                        stream_sid[0] = data["start"].get("streamSid", "")
+                        logger.info(f"[WS] Stream started (preread) — streamSid={stream_sid[0]}")
+                    elif event == "media":
+                        mulaw_bytes = base64.b64decode(data["media"]["payload"])
+                        pcm_bytes = mulaw_to_pcm16k(mulaw_bytes)
+                        await el_ws.send(json.dumps({
+                            "user_audio_chunk": base64.b64encode(pcm_bytes).decode()
+                        }))
+
                 async for message in websocket.iter_text():
                     data = json.loads(message)
                     event = data.get("event")
@@ -401,6 +556,12 @@ async def _post_call(call_sid: str, cart: dict, state: dict) -> None:
     tool_calls = state["tool_calls"]
     latency_per_turn = state["latency_per_turn"]
 
+    # If the call ran for >60s but no tool ever set a meaningful disposition,
+    # the customer was reached — don't retry, log as completed with no outcome.
+    ANSWERED_THRESHOLD_SEC = 60
+    if disposition == DISPOSITION_NO_ANSWER and duration_sec > ANSWERED_THRESHOLD_SEC:
+        disposition = DISPOSITION_CALL_COMPLETED_NO_OUTCOME
+
     # Map internal retry states to final CRM disposition on last attempt
     if (
         disposition in RETRYABLE_DISPOSITIONS
@@ -421,6 +582,7 @@ async def _post_call(call_sid: str, cart: dict, state: dict) -> None:
         "WRONG_NUMBER": "Customer confirmed wrong number.",
         "NO_ANSWER": "Call ended with no conclusive outcome.",
         "BUSY": "Customer was busy; retry scheduled.",
+        "CALL_COMPLETED_NO_OUTCOME": "Call answered and conversation held; no booking or tool outcome recorded.",
     }
     summary = summary_map.get(disposition, "Call ended.")
 
@@ -452,12 +614,14 @@ async def _post_call(call_sid: str, cart: dict, state: dict) -> None:
         tool_calls=tool_calls,
         language_detected=_detect_language(transcript),
         duration_sec=duration_sec,
+        agent_type=state.get("agent_type", "imagica"),
     )
     logger.info(f"[CRM WRITE] cart_id={cart.get('cart_id')} disposition={disposition} saved to SQLite")
 
-    # Schedule retry if applicable
+    # Schedule retry if applicable — never retry if the call was actually answered
     if (
-        state["disposition"] in RETRYABLE_DISPOSITIONS
+        disposition in RETRYABLE_DISPOSITIONS
         and cart.get("attempt_number", 1) < MAX_ATTEMPTS
+        and duration_sec <= 60
     ):
         await schedule_retry(cart)

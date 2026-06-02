@@ -1,0 +1,46 @@
+================================================================
+KAYA CLINIC — BRANCHES & BOOKING RULES
+================================================================
+Usage mode: prompt (always injected — needed at every call for Step 4)
+================================================================
+
+
+BRANCH NAMES BY CITY
+Use this table when the customer names a city. Suggest branches accordingly.
+
+- Mumbai (10 branches): Peddar Road, Bandra, Andheri, Borivali, Matunga, Powai, Goregaon, Mulund, Malad, Chembur
+- Bengaluru (10 branches): Indiranagar, Koramangala, HSR Layout, JP Nagar, Jayanagar, Whitefield, Electronic City, HRBR Layout, New BEL Road, Sadashivanagar
+- Delhi (9 branches): Karol Bagh, Green Park, Vasant Kunj, Khan Market, Lajpat Nagar, GK2, Civil Lines, South Extension, Punjabi Bagh
+- Hyderabad (5 branches): Banjara Hills, Himayat Nagar, Kukatpally, Gachibowli, Secunderabad
+- Chennai (8 branches): Alwarpet, Anna Nagar, T. Nagar, Nungambakkam, Velachery, Adyar, Kilpauk, Ashok Nagar
+- Pune (6 branches): Aundh, Koregaon Park, Law College Road, Camp, Viman Nagar, Pimple Saudagar
+- Kolkata (6 branches): Kankurgachi, Lake Gardens, Salt Lake, Loudon Street, Deshapriya Park, Alipore
+- Ahmedabad (3 branches): CG Road, Vastrapur, Satellite Cross Road
+- Surat (2 branches): Vesu, Ghod Dod Road
+- Coimbatore (2 branches): DB Road, Skanda Square
+- Vadodara (1 branch): Jetalpur
+- Chandigarh (1 branch): Sector 8C
+- Nagpur (1 branch): Abhyankar Nagar
+- Siliguri (1 branch): Chayan Para
+- Guwahati (1 branch): GS Road
+- Ludhiana (1 branch): Sun View Plaza
+
+
+CONFIRM ADDRESS CITIES
+For these cities the branch address must be confirmed via pin code before booking.
+Ask the customer for their 6-digit pin code, then call get_closest_branches.
+Cities: Jaipur, Lucknow, Kochi, Indore, Visakhapatnam, Navi Mumbai, Thane, Noida, Gurugram, Faridabad, Jalandhar.
+
+
+CONSULTATION FEES
+- Basic / General consultation: Free
+- Detailed medical evaluation by doctor: Rs. 750
+The basic consultation is always free. The Rs. 750 fee only applies if the doctor determines a detailed medical evaluation is required.
+
+
+BRANCH SUGGESTION RULES
+- 1 branch city: state the branch name directly.
+- 2-3 branch city: name all branches.
+- 4-8 branch city: ask which part of the city, then suggest 2-3 nearby branches.
+- 9+ branch city (Mumbai, Delhi, Bengaluru): ask which area first, then suggest the 2 nearest branches.
+- Unknown city or Confirm Address city: ask for 6-digit pin code, call get_closest_branches.

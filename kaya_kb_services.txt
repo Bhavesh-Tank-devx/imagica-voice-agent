@@ -1,0 +1,143 @@
+================================================================
+KAYA CLINIC — SERVICES & TREATMENTS
+================================================================
+Usage mode: auto (retrieved when customer mentions a concern or asks about a treatment)
+================================================================
+
+
+================================================================
+SKIN SERVICES
+================================================================
+
+Kaya offers advanced skin treatments delivered by qualified dermatologists, customised to individual skin types and concerns.
+
+LASER HAIR REDUCTION
+Description: Permanent solution for unwanted hair using FDA-approved laser technology. Targets hair follicles to prevent regrowth without harming the skin.
+Areas treated: Face, underarms, legs, back, arms, and more.
+Benefits: Safe for all skin types, permanent reduction over multiple sessions, minimal discomfort, no downtime.
+
+CHEMICAL PEEL TREATMENT
+Description: Exfoliates dead skin cells, reduces blemishes, and treats pigmentation. Promotes regeneration of new cells and improves skin texture.
+Treats: Acne scars, fine lines, dullness, pigmentation, uneven skin tone.
+Benefits: Customised peel intensity, refreshed complexion, minimal downtime.
+
+SKIN BRIGHTENING & LIGHTENING
+Description: Targets dullness, pigmentation, and uneven skin tone using advanced lasers and brightening facials.
+Benefits: Eliminates dark spots, promotes even complexion, non-invasive, suitable for all skin types.
+
+Q-SWITCH LASER TREATMENT
+Description: Targets pigmentation, dark spots, and uneven skin tone using laser energy to break down excess melanin.
+Treats: Freckles, age spots, sun damage, melasma.
+Benefits: Safe, non-invasive, visible brightening after a few sessions.
+
+FACIAL TREATMENTS
+Types: Anti-acne facials, hydrating facials, anti-ageing facials.
+Benefits: Deep pore cleansing, removal of impurities, revitalised glowing skin.
+
+HIFU (High-Intensity Focused Ultrasound)
+Description: Non-surgical facelift. Stimulates collagen production to firm and rejuvenate skin.
+Treats: Sagging skin, jowls, fine lines, neck laxity.
+Benefits: No surgery, no downtime, long-lasting results, improves skin elasticity.
+
+ULTRACEL Q+ HIFU
+Description: Latest generation HIFU for skin lifting and tightening. Targets multiple skin layers to stimulate collagen and elastin.
+Treats: Sagging skin, double chin, wrinkles.
+Benefits: No downtime, superior lifting, painless and non-invasive.
+
+THERMAGE
+Description: Radiofrequency technology to smooth, tighten, and contour skin. Stimulates collagen growth.
+Treats: Fine lines, wrinkles, sagging skin on face, neck, and body.
+Benefits: Non-surgical, minimal downtime, natural long-lasting results.
+
+DERMAL FILLERS
+Description: Instant volume and smoothness using safe medical-grade fillers. Non-surgical anti-ageing solution.
+Areas: Cheeks, lips, under-eye, nasolabial folds.
+Benefits: Immediate visible results, natural-looking, lasts up to 12 months, minimal discomfort.
+
+ACNE SCARS TREATMENT
+Description: Targeted treatments to reduce and eliminate acne scars and blemishes.
+
+MICRONEEDLING
+Description: Stimulates natural collagen production through controlled micro-injuries. Improves skin texture and reduces scars.
+
+ANTI-WRINKLE TREATMENT
+Description: Advanced solutions to reduce and prevent fine lines and wrinkles.
+
+UNDER-EYE / EYE CIRCLE TREATMENT
+Description: Specialised treatments for dark circles, puffiness, and under-eye concerns.
+
+
+================================================================
+HAIR SERVICES
+================================================================
+
+Kaya offers comprehensive hair loss and scalp treatments delivered by expert dermatologists.
+
+HAIR LOSS TREATMENT
+Description: Personalised solutions for hair thinning and hair fall. Experts diagnose the root cause and recommend treatments from topical applications to advanced therapies.
+For: Men and women experiencing hair loss or thinning.
+
+PRP TREATMENT (Platelet-Rich Plasma)
+Description: Stimulates hair growth using the patient's own natural growth factors. Minimally invasive procedure that revitalises dormant hair follicles.
+Benefits: Boosts hair density and thickness, improves scalp circulation, safe (uses body's own plasma).
+
+QR678 THERAPY (Biocell Therapy)
+Description: Uses bioengineered growth factors to repair and rejuvenate hair follicles. Revitalises scalp health and strengthens hair roots.
+Benefits: Promotes natural hair growth, reduces hair fall, improves hair texture, long-term results.
+
+HAIR THREAD TREATMENT (PDO Threading)
+Description: Bio-absorbable threads inserted into the scalp to stimulate collagen and improve blood flow to follicles.
+Benefits: Non-surgical, thicker healthier hair, improves hair density.
+
+HAIR LOSS TREATMENT FOR MEN
+Description: Specialised treatments for male pattern baldness and hair thinning.
+
+HAIR LOSS TREATMENT FOR WOMEN
+Description: Tailored solutions for female hair thinning, hair fall, and female pattern hair loss.
+
+SCALP CARE SOLUTIONS
+Description: Treats dandruff, dryness, and itchiness. Advanced scalp therapies cleanse and nourish the scalp.
+Benefits: Creates ideal environment for hair growth, revitalises hair follicles.
+
+
+================================================================
+BODY CONTOURING SERVICES
+================================================================
+
+COOLSCULPTING
+Description: Non-invasive fat reduction that freezes and eliminates stubborn fat cells. Contours the body without surgery.
+
+CM SLIM
+Description: Advanced body contouring for fat reduction and muscle building.
+
+VENUS LEGACY
+Description: Radiofrequency and magnetic pulse technology for body contouring, skin tightening, and cellulite reduction.
+
+FACE FAT REDUCTION
+Description: Non-invasive treatment targeting excess fat in facial areas for a more sculpted look.
+
+IV DRIPS
+Description: Intravenous vitamin and nutrient drip treatments for skin health, immunity, and overall wellness.
+
+
+================================================================
+CONCERN → RECOMMENDED TREATMENT GUIDE
+================================================================
+
+Use this guide when the customer describes a concern to suggest 1-2 relevant treatments.
+
+ACNE & PIMPLES: Chemical Peel, Facials, Acne Scar Treatment, Microneedling
+PIGMENTATION & DARK SPOTS: Q-Switch Laser, Chemical Peel, Skin Brightening
+AGEING, WRINKLES & FINE LINES: HIFU, Thermage, Dermal Fillers, Ultracel Q+ HIFU
+DULL SKIN: HydraFacial, Chemical Peel, Skin Brightening, Facials
+HAIR LOSS (GENERAL): PRP, QR678 Therapy, Hair Thread Treatment
+HAIR LOSS IN MEN: PRP, QR678 Therapy, male hair loss treatment plan
+HAIR LOSS IN WOMEN: PRP, QR678 Therapy, Hair Thread Treatment
+UNWANTED HAIR: Laser Hair Reduction
+SAGGING SKIN: HIFU, Thermage, Ultracel Q+ HIFU, Venus Legacy
+UNDER-EYE DARK CIRCLES: Under-Eye Circle Treatment, Fillers
+BODY FAT / CONTOURING: CoolSculpting, CM Slim, Venus Legacy, Face Fat Reduction
+DRY SKIN: Hydrating Facials, customised skincare routine
+OILY SKIN: Oil Control range, targeted facials
+DANDRUFF: Scalp Care Solutions
+SCALP HEALTH: Scalp Care Solutions
