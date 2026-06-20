@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaya Clinic — Appointments</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:         #0A0A0A;
+      --ink-2:       #1A1A1A;
+      --muted:       #5C6066;
+      --muted-2:     #8A8F96;
+      --rule:        #E5E5E5;
+      --rule-2:      #F0F0F0;
+      --paper:       #FFFFFF;
+      --paper-2:     #FAFAF8;
+      --paper-3:     #F4F4F1;
+      --accent:      #1E6FFF;
+      --accent-soft: #E8F0FF;
+      --warn:        #C0392B;
+      --ok:          #0A7C53;
+      --f-display:   'Inter Tight', -apple-system, sans-serif;
+      --f-serif:     'Source Serif 4', Georgia, serif;
+      --f-mono:      'JetBrains Mono', 'SFMono-Regular', monospace;
+    }
+
+    body {
+      font-family: var(--f-display);
+      color: var(--ink);
+      background: var(--paper);
+      font-feature-settings: "ss01","cv11","tnum";
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      min-height: 100vh;
+    }
+
+    /* Nav */
+    nav {
+      border-bottom: 1px solid var(--rule);
+      padding: 0 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-brand {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .nav-brand span {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-left: 12px;
+      font-weight: 400;
+    }
+    .nav-links { display: flex; align-items: center; gap: 0; }
+    .nav-link {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0 16px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s;
+    }
+    .nav-link:hover { color: var(--ink); }
+    .nav-link.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+    /* Page */
+    .page { max-width: 1200px; margin: 0 auto; padding: 48px 48px 96px; }
+
+    /* Page header */
+    .page-eyebrow {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .page-title {
+      font-size: 28px;
+      font-weight: 500;
+      letter-spacing: -0.022em;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .page-title em {
+      font-family: var(--f-serif);
+      font-style: italic;
+      color: var(--accent);
+      font-weight: 400;
+    }
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .search-wrap { position: relative; }
+    .search-wrap input {
+      font-family: var(--f-display);
+      font-size: 13px;
+      color: var(--ink);
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      padding: 8px 12px 8px 32px;
+      width: 240px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-wrap input::placeholder { color: var(--muted-2); }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted-2);
+      pointer-events: none;
+    }
+    .refresh-btn {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--rule);
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .refresh-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+    /* Stat row */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--ink);
+      margin-bottom: 48px;
+    }
+    .stat-cell {
+      padding: 24px 0 20px;
+      border-right: 1px solid var(--rule);
+    }
+    .stat-cell:first-child { padding-left: 0; }
+    .stat-cell:last-child { border-right: none; padding-right: 0; }
+    .stat-cell + .stat-cell { padding-left: 32px; }
+    .stat-label {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 48px;
+      font-weight: 400;
+      letter-spacing: -0.035em;
+      color: var(--ink);
+      line-height: 1;
+      font-feature-settings: "tnum";
+    }
+    .stat-value.accent { color: var(--accent); }
+
+    /* Table */
+    .table-wrap { border: 1px solid var(--rule); }
+    .table-meta {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .table-label {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .last-sync {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      color: var(--muted-2);
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 10px 16px;
+      text-align: left;
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--paper-3);
+      border-bottom: 1px solid var(--rule);
+      font-weight: 400;
+    }
+    tbody tr { border-bottom: 1px solid var(--rule-2); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--paper-2); }
+    td {
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--ink-2);
+      vertical-align: middle;
+    }
+    td.mono {
+      font-family: var(--f-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    td.name { font-weight: 500; color: var(--ink); }
+    td.email { font-family: var(--f-mono); font-size: 11px; color: var(--muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .branch-tag {
+      display: inline-block;
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid var(--rule);
+      padding: 2px 8px;
+      color: var(--muted);
+      background: var(--paper-3);
+    }
+
+    .empty-row td {
+      padding: 48px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid var(--rule);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/kaya" class="nav-brand">
+      Kaya Clinic
+      <span>Voice Agent</span>
+    </a>
+    <div class="nav-links">
+      <a href="/kaya" class="nav-link">Request Call</a>
+      <a href="/kaya/appointments" class="nav-link active">Appointments</a>
+      <a href="/kaya/transcripts" class="nav-link">Transcripts</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-eyebrow">Kaya Clinic / Appointments</div>
+        <h1 class="page-title">Scheduled <em>appointments</em></h1>
+      </div>
+      <div class="header-right">
+        <div class="search-wrap">
+          <svg class="search-icon" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <circle cx="6.5" cy="6.5" r="5"/><path d="M10.5 10.5l3.5 3.5"/>
+          </svg>
+          <input type="text" id="search" placeholder="Search name, branch, city..." oninput="filterTable()" />
+        </div>
+        <button class="refresh-btn" onclick="loadData()">Refresh</button>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-cell">
+        <div class="stat-label">Total Bookings</div>
+        <div class="stat-value accent" id="stat-total">—</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Upcoming (7 days)</div>
+        <div class="stat-value" id="stat-upcoming">—</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Cities Covered</div>
+        <div class="stat-value" id="stat-cities">—</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Unique Patients</div>
+        <div class="stat-value" id="stat-patients">—</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-meta">
+        <span class="table-label">All bookings</span>
+        <span class="last-sync" id="last-sync"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Patient</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Branch</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Concern</th>
+              <th>Booked At</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr class="empty-row"><td colspan="9"><span class="spinner"></span>Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allRows = [];
+
+    async function loadData() {
+      try {
+        const res = await fetch('/api/kaya/appointments');
+        const data = await res.json();
+        allRows = data.appointments;
+        renderTable(allRows);
+        renderStats(allRows);
+        document.getElementById('last-sync').textContent = 'Synced ' + new Date().toLocaleTimeString();
+      } catch(e) {
+        document.getElementById('table-body').innerHTML = `<tr class="empty-row"><td colspan="9">Failed to load data.</td></tr>`;
+      }
+    }
+
+    function renderStats(rows) {
+      document.getElementById('stat-total').textContent = rows.length;
+      const today = new Date();
+      const week = new Date(today); week.setDate(today.getDate() + 7);
+      const upcoming = rows.filter(r => { const d = new Date(r.appointment_date); return d >= today && d <= week; }).length;
+      document.getElementById('stat-upcoming').textContent = upcoming;
+      document.getElementById('stat-cities').textContent = new Set(rows.map(r => r.city)).size;
+      document.getElementById('stat-patients').textContent = new Set(rows.map(r => r.customer_phone)).size;
+    }
+
+    function renderTable(rows) {
+      const tbody = document.getElementById('table-body');
+      if (!rows.length) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="9">No appointments found.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map(r => `
+        <tr>
+          <td class="mono">${r.id}</td>
+          <td class="name">${esc(r.customer_first_name)} ${esc(r.customer_last_name)}</td>
+          <td class="mono">${esc(r.customer_phone)}</td>
+          <td class="email" title="${esc(r.customer_email)}">${esc(r.customer_email)}</td>
+          <td><span class="branch-tag">${esc(r.branch_name)}</span> <span style="font-size:12px;color:var(--muted)">${esc(r.city)}</span></td>
+          <td style="font-weight:500">${fmtDate(r.appointment_date)}</td>
+          <td class="mono">${esc(r.appointment_time)}</td>
+          <td style="color:var(--muted);font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.concern_summary)}">${esc(r.concern_summary || '—')}</td>
+          <td class="mono">${fmtDateTime(r.booked_at)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function filterTable() {
+      const q = document.getElementById('search').value.toLowerCase();
+      renderTable(allRows.filter(r =>
+        [r.customer_first_name, r.customer_last_name, r.branch_name, r.city, r.concern_summary, r.customer_email]
+          .some(v => (v || '').toLowerCase().includes(q))
+      ));
+    }
+
+    function fmtDate(d) {
+      if (!d) return '—';
+      const [y, m, day] = d.split('-');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
+    }
+    function fmtDateTime(dt) {
+      if (!dt) return '—';
+      return new Date(dt).toLocaleString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+    }
+    function esc(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    loadData();
+    setInterval(loadData, 30000);
+  </script>
+</body>
+</html>

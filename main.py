@@ -18,7 +18,7 @@ import uvicorn
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query, Request, WebSocket
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel
 from twilio.rest import Client as TwilioClient
 
@@ -42,7 +42,7 @@ twilio_client = TwilioClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 IST = pytz.timezone("Asia/Kolkata")
 CALLING_HOURS_START = 9   # 9 AM IST (TRAI compliance)
-CALLING_HOURS_END = 21    # 9 PM IST
+CALLING_HOURS_END = 23    # 11 PM IST (dev only — revert to 21 before production)
 
 # Session stores:
 #   cart_sessions  — cart_id  → full cart dict (populated when call is dispatched)
@@ -98,6 +98,15 @@ class CartAbandonedPayload(BaseModel):
     attempt_number: int = 1
 
 
+class KayaLeadPayload(BaseModel):
+    customer_name: str
+    customer_phone: str
+    cart_id: str
+    call_type: str = "OUTBOUND"
+    attempt_number: int = 1
+    city: str = ""
+
+
 # ---------------------------------------------------------------------------
 # App lifespan
 # ---------------------------------------------------------------------------
@@ -125,6 +134,66 @@ async def dashboard():
     return FileResponse("dashboard.html")
 
 
+@app.get("/kaya")
+async def kaya_demo():
+    return FileResponse("kaya_demo.html")
+
+
+@app.get("/kaya/appointments")
+async def kaya_appointments_page():
+    return FileResponse("kaya_appointments.html")
+
+
+@app.get("/kaya/transcripts")
+async def kaya_transcripts_page():
+    return FileResponse("kaya_transcripts.html")
+
+
+@app.get("/api/kaya/appointments")
+async def api_kaya_appointments():
+    import sqlite3
+    conn = sqlite3.connect("post_call.db")
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute("SELECT * FROM kaya_bookings ORDER BY appointment_date, appointment_time").fetchall()
+    conn.close()
+    return JSONResponse({"appointments": [dict(r) for r in rows]})
+
+
+@app.get("/api/kaya/transcripts")
+async def api_kaya_transcripts():
+    import sqlite3
+    conn = sqlite3.connect("post_call.db")
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        "SELECT id, cart_id, customer_name, customer_phone, disposition, "
+        "duration_seconds, called_at, agent_type "
+        "FROM call_logs WHERE agent_type='kaya' ORDER BY id DESC"
+    ).fetchall()
+    conn.close()
+    return JSONResponse({"calls": [dict(r) for r in rows]})
+
+
+@app.get("/api/kaya/transcripts/{call_id}")
+async def api_kaya_transcript_detail(call_id: int):
+    import sqlite3, json
+    conn = sqlite3.connect("post_call.db")
+    conn.row_factory = sqlite3.Row
+    row = conn.execute(
+        "SELECT id, cart_id, customer_name, customer_phone, disposition, "
+        "transcript, duration_seconds, called_at "
+        "FROM call_logs WHERE id=? AND agent_type='kaya'", (call_id,)
+    ).fetchone()
+    conn.close()
+    if not row:
+        raise HTTPException(status_code=404, detail="Call not found")
+    data = dict(row)
+    try:
+        data["transcript"] = json.loads(data["transcript"] or "[]")
+    except Exception:
+        data["transcript"] = []
+    return JSONResponse(data)
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -135,7 +204,11 @@ async def health():
 # ---------------------------------------------------------------------------
 
 @app.post("/twilio/answer")
-async def twilio_answer(request: Request, cart_id: str = Query(...)):
+async def twilio_answer(
+    request: Request,
+    cart_id: str = Query(...),
+    agent_type: str = Query(default="imagica"),
+):
     """
     Twilio calls this URL when the customer answers.
     Returns TwiML that opens a bidirectional media stream to our WebSocket handler.
@@ -156,9 +229,14 @@ async def twilio_answer(request: Request, cart_id: str = Query(...)):
     # Bind call_sid → cart_id for the WebSocket handler to look up
     if call_sid and cart_id:
         call_sessions[call_sid] = cart_id
-        logger.info(f"[TWILIO] Answer: call_sid={call_sid} cart_id={cart_id} answered_by={answered_by or 'n/a'}")
+        logger.info(
+            f"[TWILIO] Answer: call_sid={call_sid} cart_id={cart_id} "
+            f"agent_type={agent_type} answered_by={answered_by or 'n/a'}"
+        )
 
-    stream_url = f"wss://{BASE_URL.removeprefix('https://').removeprefix('http://')}/twilio/media-stream?cart_id={cart_id}"
+    base = BASE_URL.removeprefix("https://").removeprefix("http://")
+    stream_url = f"wss://{base}/twilio/media-stream?cart_id={cart_id}"
+    logger.info(f"[TWILIO] Stream URL → {stream_url}")
     twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Connect>
@@ -189,9 +267,9 @@ async def twilio_status(request: Request):
         if cart_id:
             cart = cart_sessions.pop(cart_id, None)
 
-            # Retry on no-answer or busy (same retry.py logic, unchanged)
+            # Retry on no-answer or busy only
             if call_status in ("no-answer", "busy") and cart:
-                from retry import RETRYABLE_DISPOSITIONS, MAX_ATTEMPTS, schedule_retry
+                from retry import MAX_ATTEMPTS, schedule_retry
                 if cart.get("attempt_number", 1) < MAX_ATTEMPTS:
                     logger.info(
                         f"[TWILIO STATUS] Scheduling retry for cart_id={cart_id} "
@@ -207,19 +285,40 @@ async def twilio_status(request: Request):
 # ---------------------------------------------------------------------------
 
 @app.websocket("/twilio/media-stream")
-async def twilio_media_stream(websocket: WebSocket, cart_id: str = Query(...)):
+async def twilio_media_stream(websocket: WebSocket):
     """
     Twilio connects here (from the <Stream> TwiML) and sends bidirectional µ-law audio.
-    We bridge it to ElevenLabs Conversational AI via voice_agent.media_stream_handler.
+    Twilio strips URL query params from WebSocket upgrade requests, so we accept first,
+    read until the "start" event (which carries callSid), then look up the cart via
+    call_sessions[callSid]. Pre-read messages are passed to the handler for replay.
     """
-    cart = cart_sessions.get(cart_id)
+    await websocket.accept()
+
+    preread: list[str] = []
+    cart = None
+    call_sid_ws = ""
+
+    try:
+        async for raw in websocket.iter_text():
+            preread.append(raw)
+            data = json.loads(raw)
+            if data.get("event") == "start":
+                call_sid_ws = data["start"].get("callSid", "")
+                cart_id = call_sessions.get(call_sid_ws, "")
+                cart = cart_sessions.get(cart_id)
+                break
+            if len(preread) >= 5:
+                break
+    except Exception as exc:
+        logger.error(f"[WS] Error reading start event: {exc}")
+
     if not cart:
-        logger.warning(f"[WS] No cart found for cart_id={cart_id} — closing")
+        logger.warning(f"[WS] No cart found for call_sid={call_sid_ws!r} — closing")
         await websocket.close(code=1008)
         return
 
-    # call_sid is set later in the 'start' event; pass cart_id as a stand-in for now
-    await media_stream_handler(websocket, cart_id, cart)
+    agent_type = cart.get("agent_type", "imagica")
+    await media_stream_handler(websocket, call_sid_ws, cart, agent_type=agent_type, preread=preread)
 
 
 # ---------------------------------------------------------------------------
@@ -266,6 +365,65 @@ async def cart_abandoned(payload: CartAbandonedPayload):
 
 
 # ---------------------------------------------------------------------------
+# Kaya Clinic lead intake
+# ---------------------------------------------------------------------------
+
+@app.post("/webhook/kaya-lead")
+async def kaya_lead(payload: KayaLeadPayload):
+    logger.info(
+        f"Received kaya-lead: cart_id={payload.cart_id} "
+        f"customer={payload.customer_name} phone={payload.customer_phone}"
+    )
+
+    if payload.customer_phone in DND_LIST:
+        logger.info(f"DND suppressed: {payload.customer_phone}")
+        return {"status": "suppressed", "reason": "DND list", "cart_id": payload.cart_id}
+
+    scheduled_at = None
+    if not is_calling_hours():
+        scheduled_at = next_calling_window()
+        now_ist = datetime.now(IST).strftime("%H:%M IST")
+        logger.info(
+            f"Outside calling hours ({now_ist}) — cart_id={payload.cart_id} "
+            f"queued for next window at {scheduled_at} UTC"
+        )
+
+    enqueue_call(
+        cart_id=payload.cart_id,
+        customer_name=payload.customer_name,
+        customer_phone=payload.customer_phone,
+        cart_value=0,
+        cart_data_json=payload.model_dump_json(),
+        attempt_number=payload.attempt_number,
+        scheduled_at=scheduled_at,
+        agent_type="kaya",
+    )
+    return {
+        "status": "queued",
+        "cart_id": payload.cart_id,
+        "customer": payload.customer_name,
+        "agent_type": "kaya",
+        "scheduled_at": scheduled_at or "immediate",
+    }
+
+
+# ---------------------------------------------------------------------------
+# ElevenLabs post-call webhook
+# ---------------------------------------------------------------------------
+
+@app.post("/webhook/call-ended")
+async def call_ended(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    conversation_id = body.get("conversation_id", "unknown")
+    status = body.get("status", "unknown")
+    logger.info(f"[EL WEBHOOK] call-ended: conversation_id={conversation_id} status={status}")
+    return Response(content="", status_code=204)
+
+
+# ---------------------------------------------------------------------------
 # Internal retry endpoint (called by agent.py / voice_agent.py after NO_ANSWER/BUSY)
 # ---------------------------------------------------------------------------
 
@@ -293,11 +451,12 @@ async def dial_customer(cart: dict) -> str:
     """
     cart_id = cart["cart_id"]
     phone = cart["customer_phone"]
+    agent_type = cart.get("agent_type", "imagica")
 
     # Register cart data before dialling so the WebSocket handler can find it
     cart_sessions[cart_id] = cart
 
-    answer_url = f"{BASE_URL}/twilio/answer?cart_id={cart_id}"
+    answer_url = f"{BASE_URL}/twilio/answer?cart_id={cart_id}&agent_type={agent_type}"
     status_url = f"{BASE_URL}/twilio/status"
 
     call = twilio_client.calls.create(
@@ -324,20 +483,34 @@ async def _dispatch_and_dial(queue_row: dict) -> None:
     queue_id = queue_row["id"]
     cart_id = queue_row["cart_id"]
     attempt_number = queue_row.get("attempt_number", 1)
+    agent_type = queue_row.get("agent_type", "imagica")
     payload_dict = json.loads(queue_row["cart_data"])
 
-    cart_data = {
-        "customer_name": payload_dict["customer_name"],
-        "customer_phone": payload_dict["customer_phone"],
-        "cart_id": cart_id,
-        "visit_date": payload_dict["visit_date"],
-        "tickets": payload_dict["tickets"],
-        "total_amount": payload_dict["total_amount"],
-        "park_name": "Imagicaa Theme Park, Khopoli",
-        "booking_link": f"https://imagicaa.com/book?cart={cart_id}",
-        "attempt_number": attempt_number,
-        "call_placed_at": datetime.now().isoformat(),
-    }
+    if agent_type == "kaya":
+        cart_data = {
+            "agent_type": "kaya",
+            "customer_name": payload_dict["customer_name"],
+            "customer_phone": payload_dict["customer_phone"],
+            "cart_id": cart_id,
+            "city": payload_dict.get("city", ""),
+            "call_type": payload_dict.get("call_type", "OUTBOUND"),
+            "attempt_number": attempt_number,
+            "call_placed_at": datetime.now().isoformat(),
+        }
+    else:
+        cart_data = {
+            "agent_type": "imagica",
+            "customer_name": payload_dict["customer_name"],
+            "customer_phone": payload_dict["customer_phone"],
+            "cart_id": cart_id,
+            "visit_date": payload_dict["visit_date"],
+            "tickets": payload_dict["tickets"],
+            "total_amount": payload_dict["total_amount"],
+            "park_name": "Imagicaa Theme Park, Khopoli",
+            "booking_link": f"https://imagicaa.com/book?cart={cart_id}",
+            "attempt_number": attempt_number,
+            "call_placed_at": datetime.now().isoformat(),
+        }
 
     try:
         call_sid = await dial_customer(cart_data)
@@ -345,7 +518,7 @@ async def _dispatch_and_dial(queue_row: dict) -> None:
         logger.info(
             f"[QUEUE] Call dispatched: call_sid={call_sid} "
             f"cart_id={cart_id} customer={cart_data['customer_name']} "
-            f"value=₹{cart_data['total_amount']} attempt={attempt_number}"
+            f"value={'n/a' if agent_type == 'kaya' else cart_data['total_amount']} attempt={attempt_number}"
         )
     except Exception as exc:
         logger.error(

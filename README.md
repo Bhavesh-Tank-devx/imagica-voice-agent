@@ -8,10 +8,10 @@ An AI outbound voice agent that calls customers who abandoned their booking cart
 
 **2 terminals** to run the full system:
 
-| Terminal | Command | What it does |
-|---|---|---|
-| **1** | `python agent.py start` | Agent worker — connects to LiveKit, waits for dispatch jobs |
-| **2** | `python main.py` | FastAPI webhook server + dashboard on port 8000 |
+| Terminal | Command                 | What it does                                                |
+| -------- | ----------------------- | ----------------------------------------------------------- |
+| **1**    | `python agent.py start` | Agent worker — connects to LiveKit, waits for dispatch jobs |
+| **2**    | `python main.py`        | FastAPI webhook server + dashboard on port 8000             |
 
 Both must be running simultaneously. Start Terminal 1 first.
 
@@ -20,6 +20,7 @@ Both must be running simultaneously. Start Terminal 1 first.
 ## Quick Start (after IDE crash / fresh session)
 
 ### Terminal 1 — Agent Worker
+
 ```bash
 cd ~/imagica-voice-agent
 source venv/bin/activate
@@ -27,19 +28,26 @@ python agent.py start
 ```
 
 You should see something like:
+
 ```
 Starting worker in production mode...
 Registered worker, waiting for jobs...
 ```
 
 ### Terminal 2 — Webhook Server + Dashboard
+
 ```bash
 cd ~/imagica-voice-agent
 source venv/bin/activate
 python main.py
 ```
 
+### Terminal 3 - ngrok
+
+ngrok http --url=redressable-spectrochemical-aarav.ngrok-free.dev 8000
+
 You should see:
+
 ```
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 INFO:     Imagica webhook server started
@@ -190,16 +198,16 @@ CCT_DEMO_PHONE=+91XXXXXXXXXX   # human handoff number for transfer_to_human
 
 ## API Endpoints
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/` | Dev dashboard (HTML) |
-| `GET` | `/health` | Health check |
-| `GET` | `/token?room=<name>` | Generate LiveKit participant JWT |
-| `GET` | `/metrics` | Aggregated call metrics |
-| `GET` | `/calls` | Recent call logs (last 20) |
-| `GET` | `/calls/{id}` | Full detail for one call |
-| `POST` | `/webhook/cart-abandoned` | Dispatch Priya for a cart |
-| `POST` | `/internal/schedule-retry` | Internal retry scheduling |
+| Method | Path                       | Description                      |
+| ------ | -------------------------- | -------------------------------- |
+| `GET`  | `/`                        | Dev dashboard (HTML)             |
+| `GET`  | `/health`                  | Health check                     |
+| `GET`  | `/token?room=<name>`       | Generate LiveKit participant JWT |
+| `GET`  | `/metrics`                 | Aggregated call metrics          |
+| `GET`  | `/calls`                   | Recent call logs (last 20)       |
+| `GET`  | `/calls/{id}`              | Full detail for one call         |
+| `POST` | `/webhook/cart-abandoned`  | Dispatch Priya for a cart        |
+| `POST` | `/internal/schedule-retry` | Internal retry scheduling        |
 
 ---
 
@@ -258,6 +266,7 @@ The agent job subprocess exits ~20 seconds after the call ends. Any `asyncio.sle
 Requires `LIVEKIT_SIP_TRUNK_ID` in `.env`. Without it, the system works in browser mode only.
 
 ### Create the LiveKit SIP outbound trunk
+
 ```bash
 lk sip outbound create \
   --url wss://your-project.livekit.cloud \
@@ -278,11 +287,13 @@ Copy the `ST_xxx` trunk ID into `.env` as `LIVEKIT_SIP_TRUNK_ID`.
 SQLite file: `post_call.db` (auto-created on first call)
 
 **Inspect calls:**
+
 ```bash
 sqlite3 post_call.db "SELECT cart_id, customer_name, disposition, attempt_number, duration_seconds, called_at FROM call_logs ORDER BY id DESC LIMIT 20;"
 ```
 
 **Full transcript for a call:**
+
 ```bash
 sqlite3 post_call.db "SELECT transcript FROM call_logs WHERE id=1;"
 ```
@@ -291,15 +302,15 @@ sqlite3 post_call.db "SELECT transcript FROM call_logs WHERE id=1;"
 
 ## Dispositions
 
-| Value | Meaning | Retries? |
-|---|---|---|
-| `INTERESTED_LINK_SENT` | Positive signal, booking link sent via SMS | No |
-| `CALLBACK_SCHEDULED` | Customer asked to be called later | No |
-| `NOT_INTERESTED` | Customer firmly declined | No |
-| `TRANSFERRED_TO_HUMAN` | Escalated to human agent | No |
-| `NO_ANSWER` | Call ended with no outcome | Yes (up to attempt 3) |
-| `BUSY` | Customer busy / no pickup | Yes (up to attempt 3) |
-| `UNREACHABLE` | Final state after all attempts exhausted | No |
+| Value                  | Meaning                                    | Retries?              |
+| ---------------------- | ------------------------------------------ | --------------------- |
+| `INTERESTED_LINK_SENT` | Positive signal, booking link sent via SMS | No                    |
+| `CALLBACK_SCHEDULED`   | Customer asked to be called later          | No                    |
+| `NOT_INTERESTED`       | Customer firmly declined                   | No                    |
+| `TRANSFERRED_TO_HUMAN` | Escalated to human agent                   | No                    |
+| `NO_ANSWER`            | Call ended with no outcome                 | Yes (up to attempt 3) |
+| `BUSY`                 | Customer busy / no pickup                  | Yes (up to attempt 3) |
+| `UNREACHABLE`          | Final state after all attempts exhausted   | No                    |
 
 ---
 
@@ -307,27 +318,27 @@ sqlite3 post_call.db "SELECT transcript FROM call_logs WHERE id=1;"
 
 Key log prefixes:
 
-| Prefix | Meaning |
-|---|---|
-| `[CALL START]` | Priya entered the room |
-| `[TRANSCRIPT] Customer:` | Customer speech (transcribed) |
-| `[TRANSCRIPT] Priya:` | Priya's speech (transcribed) |
-| `[LATENCY]` | Per-turn e2e latency in ms |
-| `[CALL END]` | Duration, disposition, turn count |
-| `[CRM WRITE]` | Record saved to SQLite |
-| `[RETRY]` | Retry handoff fired |
-| `[SMS/...]` | SMS send attempt |
-| `[TRANSFER]` | Human handoff triggered |
+| Prefix                   | Meaning                           |
+| ------------------------ | --------------------------------- |
+| `[CALL START]`           | Priya entered the room            |
+| `[TRANSCRIPT] Customer:` | Customer speech (transcribed)     |
+| `[TRANSCRIPT] Priya:`    | Priya's speech (transcribed)      |
+| `[LATENCY]`              | Per-turn e2e latency in ms        |
+| `[CALL END]`             | Duration, disposition, turn count |
+| `[CRM WRITE]`            | Record saved to SQLite            |
+| `[RETRY]`                | Retry handoff fired               |
+| `[SMS/...]`              | SMS send attempt                  |
+| `[TRANSFER]`             | Human handoff triggered           |
 
 ### Common issues
 
-| Symptom | Cause | Fix |
-|---|---|---|
-| `Failed to resolve oauth2.googleapis.com` | No internet / DNS | Check network |
-| `1008 policy violation` on Gemini connect | Model not in that region | Use `us-central1` |
-| Priya silent after join | Gemini failed to connect | Check agent logs for API errors |
-| `NotAllowedError` in browser | Mic permission denied | Allow mic in browser prompt |
-| Stale dispatch blocking new calls | Old dispatch orphaned | Auto-handled by idempotency guard |
+| Symptom                                   | Cause                    | Fix                               |
+| ----------------------------------------- | ------------------------ | --------------------------------- |
+| `Failed to resolve oauth2.googleapis.com` | No internet / DNS        | Check network                     |
+| `1008 policy violation` on Gemini connect | Model not in that region | Use `us-central1`                 |
+| Priya silent after join                   | Gemini failed to connect | Check agent logs for API errors   |
+| `NotAllowedError` in browser              | Mic permission denied    | Allow mic in browser prompt       |
+| Stale dispatch blocking new calls         | Old dispatch orphaned    | Auto-handled by idempotency guard |
 
 ---
 

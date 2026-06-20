@@ -52,6 +52,24 @@ ELEVENLABS_AGENT_ID = os.getenv("ELEVENLABS_AGENT_ID", "")
 ELEVENLABS_KAYA_AGENT_ID = os.getenv("ELEVENLABS_KAYA_AGENT_ID", ELEVENLABS_AGENT_ID)
 ELEVENLABS_WSS_URL = "wss://api.elevenlabs.io/v1/convai/conversation"
 
+# ASR keyword boosting — biases the speech-to-text decoder toward these terms so
+# brand / agent / place names (the most-mis-transcribed words on Hinglish calls)
+# are recognised correctly. Field path verified against elevenlabs SDK v2.50.0:
+# conversation_config_override.asr.keywords (typing.List[str]).
+# DISABLED by default: the ASR keywords override must first be allowed in the
+# ElevenLabs dashboard → Agent → Security/Overrides (the "asr.keywords" toggle),
+# or session init is rejected with a 1008 close and EVERY call fails. Turn on only
+# after enabling that toggle and verifying on one test call: KAYA_ASR_KEYWORDS=1.
+# Keep the list to proper nouns only — biasing toward already-common words is
+# low-value and can hurt. Note: a static list cannot fix per-call unknowns like a
+# caller's surname or email local-part (those rely on spell-back confirmation).
+KAYA_ASR_KEYWORDS_ENABLED = os.getenv("KAYA_ASR_KEYWORDS", "0") == "1"
+KAYA_ASR_KEYWORDS = [
+    "Kaya", "Kaya Clinic", "Priya",
+    "Vesu", "Ghod Dod Road", "Surat", "Vashi", "Bandra", "Andheri",
+    "Juhu", "Koramangala", "Indiranagar", "Bengaluru",
+]
+
 # Twilio sends 8 kHz µ-law; ElevenLabs expects 16 kHz PCM 16-bit mono.
 TWILIO_SAMPLE_RATE = 8000
 ELEVENLABS_SAMPLE_RATE = 16000
@@ -139,7 +157,7 @@ def _fuzzy_correct_email(email: str, first_name: str, last_name: str) -> str:
         if dist < best_dist:
             best_dist, best_candidate = dist, candidate
 
-    if best_dist <= 3 and best_candidate:
+    if best_dist <= 2 and best_candidate:
         corrected = best_candidate + "@" + domain
         if corrected != email:
             logger.info(f"[EMAIL] Fuzzy-corrected '{email}' → '{corrected}' (edit_dist={best_dist})")
@@ -341,6 +359,9 @@ async def media_stream_handler(
                 "call_type": call_type,
             },
         }
+        if KAYA_ASR_KEYWORDS_ENABLED:
+            session_init["conversation_config_override"]["asr"] = {"keywords": KAYA_ASR_KEYWORDS}
+            logger.info("[EL] ASR keyword boosting enabled (%d keywords)", len(KAYA_ASR_KEYWORDS))
         el_url = f"{ELEVENLABS_WSS_URL}?agent_id={ELEVENLABS_KAYA_AGENT_ID}"
         if not ELEVENLABS_KAYA_AGENT_ID:
             logger.warning("[WS] ELEVENLABS_KAYA_AGENT_ID not set — falling back to ELEVENLABS_AGENT_ID")

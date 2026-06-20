@@ -1,11 +1,11 @@
 # Session Context Dump — Kaya Clinic Voice Agent
-_Last updated: 2026-06-02_
+_Last updated: 2026-06-04_
 
 ## What was built across sessions
 
 Added a full second voice agent campaign (Kaya Clinic) to the existing Imagicaa multi-tenant architecture. Both agents share the same FastAPI server, Twilio number, and WebSocket bridge. Routing is determined by `agent_type` in the cart dict.
 
-In this session: debugged the full call path end-to-end, made a live test call, and confirmed Kaya's Priya speaks over the phone. Also rewrote the system prompt and split the knowledge base per ElevenLabs best practices.
+Across three sessions: debugged the full call path end-to-end, made multiple live test calls, improved prompt quality (Hinglish, phonetics, email handling, language mirroring, time slot acceptance, domain spelling), added backend email correction helpers, rebuilt both frontend pages per the DevX Doctrine design system, and added hosting guidance.
 
 ---
 
@@ -14,136 +14,167 @@ In this session: debugged the full call path end-to-end, made a live test call, 
 ### Server
 - **Entry point:** `python main.py` (port 8000)
 - **Tunnel:** `ngrok http --url=redressable-spectrochemical-aarav.ngrok-free.dev 8000` (must run alongside server)
-- **Status:** ✅ Fully working — live test call completed, Priya spoke and collected booking details
+- **Status:** ✅ Fully working — multiple live test calls completed, bookings saved to DB
+
+### Calling hours
+- `CALLING_HOURS_START = 9` (9 AM IST)
+- `CALLING_HOURS_END = 23` ← **DEV ONLY** — revert to `21` before production
 
 ### Call flow — verified working
 ```
 POST /webhook/kaya-lead
   → enqueue_call(agent_type="kaya", cart_value=0)
     → queue worker picks up in ~10s
-      → _dispatch_and_dial builds kaya cart dict
-        → dial_customer → twilio_client.calls.create()
+      → _dispatch_and_dial builds kaya cart dict (branches on agent_type)
+        → cart_sessions[cart_id] = cart
+        → dial_customer → twilio_client.calls.create(url=answer_url?cart_id=X&agent_type=kaya)
           → Twilio dials customer
             → customer answers → AMD fires
               → POST /twilio/answer?cart_id=X&agent_type=kaya
-                → returns <Stream url="wss://ngrok/twilio/media-stream"> TwiML (no query params in stream URL)
-                  → Twilio opens WebSocket
-                    → server accepts WebSocket, reads until "start" event to get callSid
-                    → looks up cart via call_sessions[callSid]
-                      → media_stream_handler(agent_type="kaya")
+                → call_sessions[callSid] = cart_id
+                → returns <Stream url="wss://ngrok/twilio/media-stream"> TwiML
+                  → Twilio opens WebSocket (no query params)
+                    → server accept() first → reads until "start" event → gets callSid
+                    → looks up cart via call_sessions[callSid] → cart_sessions[cart_id]
+                      → media_stream_handler(agent_type="kaya", preread=preread)
                         → sends session_init with dynamic_variables + pcm_16000 format
                         → connects to ELEVENLABS_KAYA_AGENT_ID
                         → audio bridge runs
                           → tool calls: get_closest_branches, book_appointment, end_call
+                            → email: _normalize_email → _fuzzy_correct_email before saving
                             → post_call: log_call + log_kaya_booking (if CONVERTED)
 ```
 
 ---
 
-## Bugs fixed this session
+## Bugs fixed across sessions
 
 ### 1. WebSocket 403 — Twilio strips query params from WebSocket URL
-**Root cause:** Twilio does not forward URL query parameters when opening a WebSocket connection. `cart_id` was in the stream URL but arrived empty at the server.
+**Fix:** WebSocket handler accepts first, reads until "start" event, looks up cart via `call_sessions[callSid]`.
 
-**Fix in `main.py`:**
-- WebSocket handler now calls `websocket.accept()` first
-- Reads Twilio messages until the `"start"` event, which carries `callSid`
-- Looks up `cart_id` via `call_sessions[callSid]` (populated by `/twilio/answer`)
-- Passes pre-read messages to `media_stream_handler` as `preread` list for replay
+### 2. ElevenLabs 1008 — `first_message` / `prompt` override not allowed
+**Fix:** Removed both from `session_init`. Managed entirely in ElevenLabs dashboard.
 
-**Fix in `voice_agent.py`:**
-- `media_stream_handler` no longer calls `websocket.accept()` (caller does it)
-- Added `preread: list | None = None` parameter
-- `twilio_to_elevenlabs()` replays preread messages before starting the live loop
+### 3. ElevenLabs 1008 — missing required dynamic variable
+**Fix:** `session_init` sends `dynamic_variables`: `customer_phone`, `customer_name`, `city`, `call_type`.
 
-### 2. ElevenLabs 1008 — `first_message` override not allowed
-**Root cause:** ElevenLabs agent security settings block `first_message` override from the client.
-**Fix:** Removed `first_message` from `session_init`. Set it directly in the ElevenLabs dashboard.
+### 4. Retry firing on answered calls
+**Fix:** `_post_call()` upgrades `NO_ANSWER → CALL_COMPLETED_NO_OUTCOME` if `duration > 60s`. Retry only fires if `duration_sec <= 60`.
 
-### 3. ElevenLabs 1008 — `prompt` override not allowed
-**Root cause:** Same security restriction for the `prompt` field.
-**Fix:** Removed `prompt` from `session_init`. System prompt is now set and managed entirely in the ElevenLabs dashboard. `session_init` only sends `tts.output_format: pcm_16000` and `dynamic_variables`.
+### 5. `/webhook/call-ended` returning 404
+**Fix:** Added `POST /webhook/call-ended` endpoint — logs event, returns 204.
 
-### 4. ElevenLabs 1008 — missing required dynamic variable `customer_phone`
-**Root cause:** The Kaya agent dashboard has tools that use `{{customer_phone}}` as a dynamic variable placeholder. These must be supplied at conversation start.
-**Fix:** Added `dynamic_variables` to `session_init` in `voice_agent.py`:
-```python
-"dynamic_variables": {
-    "customer_phone": cart.get("customer_phone", ""),
-    "customer_name": cart.get("customer_name", ""),
-    "city": cart.get("city", ""),
-}
-```
+### 6. `/kaya` route 404 after latest commit
+**Fix:** Restored `GET /kaya`, `POST /webhook/kaya-lead`, `POST /webhook/call-ended`, and `KayaLeadPayload` model that were dropped.
 
-### 5. Retry firing on answered calls
-**Root cause:** Calls lasting 7+ minutes with a full conversation were logged as `NO_ANSWER` (no booking tool was called), triggering retries.
-**Fix in `voice_agent.py` `_post_call()`:**
-- If `disposition == NO_ANSWER` and `duration_sec > 60`: upgrades disposition to `CALL_COMPLETED_NO_OUTCOME`
-- Retry only fires if `duration_sec <= 60` (true no-answer / busy)
+### 7. `_dispatch_and_dial` KeyError on `visit_date`
+**Fix:** Added `agent_type` branching — kaya builds a slim cart dict, imagica uses the original.
 
-### 6. `/webhook/call-ended` returning 404
-**Root cause:** ElevenLabs POSTs to this URL after each conversation (configured in agent dashboard) but the route didn't exist.
-**Fix:** Added `POST /webhook/call-ended` endpoint in `main.py` — logs the event, returns 204.
+### 8. WebSocket 403 (second occurrence) — `cart_id: str = Query(...)` rejected
+**Fix:** Restored accept-first / callSid-lookup pattern (lost in a commit). Also fixed `dial_customer` to include `agent_type` in the answer URL, and `twilio_answer` to accept `agent_type` query param.
+
+### 9. Fuzzy email corrector over-correcting digits
+**Fix:** Lowered Levenshtein threshold from 3 → 2. `bhavesh369tank` (3 deletions) no longer stripped to `bhaveshtank`.
+
+### 10. `[Warmly]`, `[Patiently]` spoken aloud by agent
+**Fix:** Added guardrail to prompt: bracketed emotion/tone labels must never be spoken.
+
+### 11. Agent switching to Hinglish for English-speaking customers
+**Fix:** Language rule changed — mirror the customer's language; Hinglish only triggered by customer using Hindi.
+
+### 12. Agent offering 7:00/7:30 alternatives when customer said "7 o'clock"
+**Fix:** Step 5 updated — accept exact hours/half-hours directly; only offer alternatives for off-boundary times.
+
+### 13. Voicemail (AMD machine_start) not retried
+**Note:** AMD `machine_start` was Twilio's trial-plan message, not a real customer voicemail. Voicemail retry logic was added and then removed. Retry fires only on `no-answer` or `busy`.
+
+### 14. Relative dates ("this Saturday") unresolvable (2026-06-03 Gladston call)
+**Fix:** Added `{{system__time}}` to prompt Context — it's an ElevenLabs **built-in system variable** (outputs "Wednesday, 11:45 3 June 2026" style, localized via agent timezone), auto-provided, needs NO allowlist entry and NO session_init change. Step 5 now resolves relative dates against it, confirms the computed calendar date back, and handles Sunday (closed) → offer Saturday/Monday.
+
+### 15. Agent not switching to Hinglish despite full-Hindi sentences (Gladston call)
+**Fix:** Old Language rule was self-defeating — "never impose a language unprompted" + "do NOT switch on your own" suppressed the one-Hindi-word trigger, so Priya stayed English until explicitly asked. Rewritten: ANY Hindi (word, phrase, or Devanagari sentence) → switch to Hinglish from the very next reply, automatically and silently.
+
+### 16. Dead-air pauses after Step 2 anchor and Step 6 fee (Gladston call)
+**Fix:** New Tone rule — never end a reply on a bare statement that invites no response. Step 2 anchor and Step 6 fee now fold into the next question in the same reply (Step 7 no longer re-asks for email; fee line had even repeated itself on the call).
+
+### 17. `book_appointment` called with mis-heard ASR email, not the spelled-confirmed one (Gladston call)
+Customer spelled S-E-Q-U-I-R-A, Priya read back the correct version, but the tool received `gladstonsquare-98@gmail.com` — booking id=4 saved with a wrong email. Backend fuzzy correction (Levenshtein ≤ 2) cannot catch a gap that large.
+**Fix:** Step 7 + tool spec rule — pass the spelled-and-confirmed value to `book_appointment`; spelled letters always win over the first transcription. Email param: normalize "at"→@, "dot"→., lowercase, no spaces.
 
 ---
 
-## Files modified this session
+## Files modified
 
 ### `main.py`
-- WebSocket handler: accept first → read until `"start"` event → lookup cart via `call_sessions[callSid]` → pass `preread` to handler
-- Added `POST /webhook/call-ended` endpoint for ElevenLabs post-call webhook
+- WebSocket handler: accept-first → read until `"start"` event → lookup cart via `call_sessions[callSid]`
+- `dial_customer`: stores cart in `cart_sessions`, includes `agent_type` in answer URL
+- `twilio_answer`: accepts `agent_type` query param, logs it
+- `_dispatch_and_dial`: branches on `agent_type` (kaya vs imagica cart dict)
+- `KayaLeadPayload` model added (fields: `customer_name`, `customer_phone`, `cart_id`, `call_type`, `attempt_number`, `city`)
+- `POST /webhook/kaya-lead`: enqueues Kaya calls
+- `POST /webhook/call-ended`: ElevenLabs post-call webhook
+- `GET /kaya/appointments`, `GET /kaya/transcripts`: frontend pages
+- `GET /api/kaya/appointments`: returns all kaya_bookings as JSON
+- `GET /api/kaya/transcripts`: returns kaya call list as JSON
+- `GET /api/kaya/transcripts/{id}`: returns full transcript + metadata for one call
+- `CALLING_HOURS_END = 23` (dev — revert to 21 for production)
+- Retry: fires on `no-answer` or `busy` only (voicemail retry removed)
 
 ### `voice_agent.py`
-- `media_stream_handler`: removed `websocket.accept()`, added `preread` param, replays preread messages in `twilio_to_elevenlabs()`
-- `session_init`: stripped to `tts.output_format` + `dynamic_variables` only (no prompt/first_message override)
-- Added `dynamic_variables`: `customer_phone`, `customer_name`, `city`
-- Added `DISPOSITION_CALL_COMPLETED_NO_OUTCOME` import
-- `_post_call`: upgrades `NO_ANSWER` → `CALL_COMPLETED_NO_OUTCOME` if `duration > 60s`
-- Retry guard: skips retry if `duration_sec > 60`
-
-### `post_call.py`
-- Added `DISPOSITION_CALL_COMPLETED_NO_OUTCOME = "CALL_COMPLETED_NO_OUTCOME"` constant
+- `media_stream_handler`: removed `websocket.accept()`, added `preread` param, replays preread messages
+- `session_init`: `tts.output_format` + `dynamic_variables` only (`customer_phone`, `customer_name`, `city`, `call_type`)
+- `_post_call`: upgrades `NO_ANSWER → CALL_COMPLETED_NO_OUTCOME` if `duration > 60s`
+- Added `_normalize_email()`: fixes spoken domain patterns (`atgmail` → `@gmail`, `dotcom` → `.com`)
+- Added `_levenshtein()`: proper Wagner-Fischer edit distance
+- Added `_fuzzy_correct_email()`: corrects ASR letter substitutions if edit dist ≤ 2
+- ASR keyword boosting (STT biasing): gated behind `KAYA_ASR_KEYWORDS=1` env flag — **default OFF, working pipeline untouched**. When on, sends `conversation_config_override.asr.keywords` (field path verified against installed `elevenlabs` SDK v2.50.0: `List[str]`, "keywords to boost prediction probability for"). List is proper nouns only (Kaya, Priya, branch/city names) — a static list cannot fix per-call unknowns like surnames/emails (that's what spell-back is for). Requires the `asr.keywords` override toggle in dashboard Security/Overrides FIRST, else session init dies with 1008 on every call.
 
 ### `kaya_prompt.py`
-- Full rewrite per ElevenLabs prompting guide best practices
-- Prompt now targets ~900 tokens (down from ~1800)
-- Removed all reference data (branches, services list) — these live in the knowledge base
-- Added `# Guardrails` section (ElevenLabs tunes the model to this heading)
-- Added `"This step is important"` on critical rules: phone privacy, farewell sequence, city confirmation, time slot validation
-- Added `# Tools` section with parameter formats (date: YYYY-MM-DD, time: HH:MM 24hr)
-- Added full Special Scenarios section: NOT_INTERESTED, CALLBACK, WANTS_HUMAN, WRONG_NUMBER, RETURNING_PATIENT, TRUST_CHALLENGE, ALREADY_HAS_APPOINTMENT
-- Added city confirmation step before branch lookup (fixes Vadodara/Surat class of errors)
-- Added clinic hours (10 AM–8 PM Mon–Sat) to time slot rule
-- Added pin code fallback (when customer doesn't know it)
-- Added DOB explanation if asked
-- Made referral question optional
-
-### `kaya_knowledge_base.txt`
-- Added Section 7b with branch names per city and "Confirm Address" cities to existing file
-- This file is now superseded by the three split files below
+- **Personality**: added ASR-awareness note — silently correct obvious mis-transcriptions from context; confirm critical data by read-back
+- **Context**: added `{{system__time}}` dynamic variable for current date/time (Asia/Kolkata)
+- **Tone**: added dead-air rule — never end a reply on a bare statement; always pair info with the next question
+- **Language**: English-only customers get English; ANY Hindi (word, phrase, or Devanagari sentence) → switch to Hinglish from the very next reply, automatic and silent — never wait to be asked, never announce. (Old "never impose unprompted" framing removed — it was suppressing the switch, see bug #15)
+- **Guardrails**: explicit ban on `[Warmly]`, `[Patiently]`, `[Empathetically]`, `[confident]` being spoken
+- **Step 2**: concern acknowledgement + next question in the same reply — no standalone anchor turn
+- **Step 5**: resolves relative dates (`today`, `tomorrow`, `this Saturday`, Hinglish relative days) against `{{system__time}}` without asking customer; accepts exact hours/half-hours directly; alternatives only for off-boundary times; Sunday handling
+- **Step 6**: fee + email ask in one reply — no dead air between fee and next question
+- **Step 7**: phonetics only for ambiguous letter clusters; non-standard domains spelled letter by letter; corrections re-read only the changed segment; max 2 passes; email passed to `book_appointment` MUST be the spelled-and-confirmed version — spelled letters always win over the first transcription
+- **Tools / book_appointment**: email param — normalize spoken "at"→@, "dot"→., lowercase, no spaces
+- **Step 8**: pincode fallback — use area name as branch_name if customer knows area but not pincode; never end call for missing pincode; referral question in English or Hinglish depending on language mode
+- Linter repeatedly adds blank lines — file is the source of truth; paste `_TEMPLATE` into dashboard as-is
 
 ### `.env`
-- Updated `ELEVENLABS_KAYA_AGENT_ID` to `agent_9401kt3ja3hnefya5ch2v13hrgsm`
+- `ELEVENLABS_KAYA_AGENT_ID=agent_6701kspntnxqebat1ywc9qw3spxt`
 
----
+### New files created
+| File | Purpose |
+|---|---|
+| `kaya_appointments.html` | Appointments dashboard — stat row + table, rebuilt per DevX Doctrine |
+| `kaya_transcripts.html` | Transcript viewer — split pane, call list + chat bubbles, rebuilt per DevX Doctrine |
+| `kaya_branches.py` | City/pincode → branch lookup (used by `get_closest_branches` tool) |
+| `kaya_prompt.py` | Kaya agent system prompt (`_TEMPLATE` to paste into ElevenLabs dashboard) |
+| `kaya_kb_branches.txt` | Branch names per city, Confirm Address cities, fees, rules (KB: prompt mode) |
+| `kaya_kb_services.txt` | All skin/hair/body treatments + concern→treatment guide (KB: auto) |
+| `kaya_kb_general.txt` | Company info, products, FAQs, contact details (KB: auto) |
+| `devx-doctrine (2).md` | DevX Doctrine design system — reference for all frontend work |
 
-## New files created this session
-
-| File | Purpose | ElevenLabs usage mode |
-|---|---|---|
-| `kaya_kb_branches.txt` | Branch names per city, Confirm Address cities, consultation fees, branch suggestion rules | **prompt** (always injected) |
-| `kaya_kb_services.txt` | All skin/hair/body treatments + concern→treatment guide | **auto** |
-| `kaya_kb_general.txt` | Company info, products, FAQs, contact details | **auto** |
+### UI design system
+Both HTML pages follow the **DevX Doctrine** (`devx-doctrine (2).md`):
+- Fonts: Inter Tight (UI), Source Serif 4 italic (headline emphasis), JetBrains Mono (labels/eyebrows/metadata)
+- Colors: ink-on-paper palette, single accent `#1E6FFF`, no teal/gradients/shadows
+- Containers: `1px solid #E5E5E5`, sharp corners (`border-radius: 0`), no shadows
+- Stat row: 4 large numerics under 1px ink top rule with hairline vertical dividers
+- Disposition tags: monospace, borderlined, color-coded with `--ok`/`--warn`/`--muted`
 
 ---
 
 ## ElevenLabs Kaya Agent config
 
-- **Agent ID:** `agent_9401kt3ja3hnefya5ch2v13hrgsm`
+- **Agent ID:** `agent_6701kspntnxqebat1ywc9qw3spxt`
 
 ### Dashboard settings
 - System prompt: paste `_TEMPLATE` from `kaya_prompt.py`
-- Knowledge base: upload the 3 split KB files with usage modes as above
+- Knowledge base: upload the 3 KB files with usage modes as above
 - Dynamic variables allowed: `customer_phone`, `customer_name`, `city`, `call_type`
 - Post-call webhook URL: `https://redressable-spectrochemical-aarav.ngrok-free.dev/webhook/call-ended`
 
@@ -172,7 +203,7 @@ POST /webhook/kaya-lead
 BASE_URL=https://redressable-spectrochemical-aarav.ngrok-free.dev
 TWILIO_FROM_NUMBER=+13185043576
 ELEVENLABS_AGENT_ID=agent_4101kngt2rwqepascfne4kw17p3c        # Imagicaa
-ELEVENLABS_KAYA_AGENT_ID=agent_9401kt3ja3hnefya5ch2v13hrgsm  # Kaya
+ELEVENLABS_KAYA_AGENT_ID=agent_6701kspntnxqebat1ywc9qw3spxt  # Kaya
 ```
 
 ---
@@ -188,17 +219,33 @@ source venv/bin/activate
 python main.py
 ```
 
-Test Kaya: open `http://localhost:8000/kaya`, fill name + phone + city, submit.
+Pages:
+- `http://localhost:8000/kaya` — request a call form
+- `http://localhost:8000/kaya/appointments` — appointments dashboard
+- `http://localhost:8000/kaya/transcripts` — call transcript viewer
 
 ---
 
 ## Known issues / TODOs
 
-- [ ] Kaya SMS confirmation not implemented (`sms.py` still sends Imagicaa booking link — needs Kaya-specific confirmation SMS)
-- [ ] `cart_value=0` for Kaya leads — queue priority sorting doesn't apply, all Kaya calls have equal priority
-- [ ] DND list is hardcoded — needs live registry API for production
-- [ ] `RETRY_DELAY_SECONDS=30` in `retry.py` — change to `7200` for production
-- [ ] Upload `kaya_kb_branches.txt`, `kaya_kb_services.txt`, `kaya_kb_general.txt` to ElevenLabs dashboard (not yet done)
-- [ ] Configure RAG settings in ElevenLabs dashboard (not yet done)
-- [ ] Kaya agent `book_appointment` tool in dashboard still has `dob` and `city` as optional — update to required to match code
-- [ ] ElevenLabs quota exhausted during test call — upgrade plan before production
+### Before production
+- [ ] `CALLING_HOURS_END = 23` — revert to `21`
+- [ ] `RETRY_DELAY_SECONDS=30` in `retry.py` — change to `7200`
+- [ ] DND list is hardcoded — needs live registry API
+- [ ] Kaya SMS confirmation not implemented (`sms.py` still sends Imagicaa booking link)
+- [ ] ElevenLabs quota exhausted — upgrade plan
+- [ ] SQLite → Postgres before any cloud deploy (Railway/Render filesystem is ephemeral)
+
+### ElevenLabs dashboard (manual steps pending)
+- [ ] **Re-paste latest `_TEMPLATE` from `kaya_prompt.py` into system prompt — HIGHEST PRIORITY.** All prompt fixes (bugs 14–17, STT framing) are inert until this is done. Evidence from the 2026-06-03 Gladston call suggests the deployed prompt is STALE — already-"fixed" bugs #10 (bracketed tone labels) and #11 (language mirroring) both regressed on that call. Diff dashboard vs file while in there.
+- [ ] Upload `kaya_kb_branches.txt` (prompt mode), `kaya_kb_services.txt` (auto), `kaya_kb_general.txt` (auto)
+- [ ] Configure RAG settings (see table above)
+- [ ] `{{system__time}}` needs NO dynamic-variable registration — it's a built-in system variable, auto-provided. Just verify the agent timezone is set to Asia/Kolkata so it renders IST.
+- [ ] Update `book_appointment` tool — mark `dob` and `city` as required (currently optional)
+- [ ] Mirror normalization hints in `book_appointment` **param descriptions** (email: lowercase/normalized spelled-confirmed value; pincode: digits only; dates: YYYY-MM-DD) — tool args are biased mainly by the dashboard schemas, not the prompt's `# Tools` section
+- [ ] (Optional, for ASR keyword boosting) Enable the `asr.keywords` override toggle in Security/Overrides → set `KAYA_ASR_KEYWORDS=1` in `.env` → verify on ONE test call before relying on it. Do NOT set the flag before the toggle: session init will 1008 on every call.
+
+### Hosting
+- Pages are live at ngrok URL while server + tunnel are running
+- For permanent hosting: Railway is fastest (connect GitHub repo, add env vars, ~15 min)
+- SQLite must be migrated to Postgres or a mounted volume before Railway deploy
