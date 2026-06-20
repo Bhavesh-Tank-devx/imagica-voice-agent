@@ -1,6 +1,8 @@
 """
-main.py — FastAPI webhook server for Imagica Voice Agent
-Receives cart abandonment events and dispatches Priya (LiveKit agent) to call the customer.
+main.py — FastAPI webhook server for Imagica Voice Agent (ElevenLabs + Twilio)
+
+Receives cart abandonment events, dials customers via Twilio, bridges audio
+to ElevenLabs Conversational AI through a WebSocket media stream.
 """
 import asyncio
 import json
@@ -11,18 +13,14 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pytz
-
 import httpx
 import uvicorn
-from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
-
-from livekit import api as lkapi
-from livekit.api import AccessToken, VideoGrants
-
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Query, Request, WebSocket
+from fastapi.responses import FileResponse, JSONResponse, Response
+from pydantic import BaseModel
+from twilio.rest import Client as TwilioClient
 
 from log_setup import setup_logging
 from post_call import (
@@ -30,19 +28,27 @@ from post_call import (
     enqueue_call, dequeue_next_call, mark_queue_done, mark_queue_failed,
 )
 from retry import RETRY_DELAY_SECONDS
+from voice_agent import media_stream_handler
 
 load_dotenv()
 logger = logging.getLogger("imagica-webhook")
 
-LIVEKIT_URL = os.getenv("LIVEKIT_URL", "ws://localhost:7880")
-LIVEKIT_API_KEY = os.getenv("LIVEKIT_API_KEY", "devkey")
-LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET", "secret")
-SIP_TRUNK_ID = os.getenv("LIVEKIT_SIP_TRUNK_ID")  # set to enable real phone calls; omit for playground testing
-AGENT_NAME = "imagica-priya"
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER", "")
+BASE_URL = os.getenv("BASE_URL", "https://redressable-spectrochemical-aarav.ngrok-free.dev")
+
+twilio_client = TwilioClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 IST = pytz.timezone("Asia/Kolkata")
 CALLING_HOURS_START = 9   # 9 AM IST (TRAI compliance)
-CALLING_HOURS_END = 21    # 9 PM IST
+CALLING_HOURS_END = 23    # 11 PM IST (dev only — revert to 21 before production)
+
+# Session stores:
+#   cart_sessions  — cart_id  → full cart dict (populated when call is dispatched)
+#   call_sessions  — call_sid → cart_id        (populated when Twilio hits /twilio/answer)
+cart_sessions: dict[str, dict] = {}
+call_sessions: dict[str, str] = {}
 
 
 def is_calling_hours() -> bool:
@@ -51,17 +57,11 @@ def is_calling_hours() -> bool:
 
 
 def next_calling_window() -> str:
-    """Return the next 9 AM IST window as a UTC timestamp string for SQLite comparison.
-
-    SQLite's datetime('now') is UTC, so scheduled_at must also be UTC for
-    the `scheduled_at <= datetime('now')` comparison in dequeue_next_call() to work.
-    """
+    """Return the next 9 AM IST window as a UTC timestamp string for SQLite comparison."""
     now_ist = datetime.now(IST)
     if now_ist.hour < CALLING_HOURS_START:
-        # Before 9 AM today — schedule for 9 AM this morning
         target_ist = now_ist.replace(hour=CALLING_HOURS_START, minute=0, second=0, microsecond=0)
     else:
-        # At or after 9 PM — schedule for 9 AM tomorrow
         target_ist = (now_ist + timedelta(days=1)).replace(
             hour=CALLING_HOURS_START, minute=0, second=0, microsecond=0
         )
@@ -78,7 +78,9 @@ DND_LIST = {
 }
 
 
-# --- Request models ---
+# ---------------------------------------------------------------------------
+# Request models
+# ---------------------------------------------------------------------------
 
 class TicketItem(BaseModel):
     type: str
@@ -94,28 +96,102 @@ class CartAbandonedPayload(BaseModel):
     tickets: List[TicketItem]
     total_amount: int
     attempt_number: int = 1
-    mode: str = "browser"  # "browser" = LiveKit room only; "phone" = also dial SIP
 
 
-# --- App ---
+class KayaLeadPayload(BaseModel):
+    customer_name: str
+    customer_phone: str
+    cart_id: str
+    call_type: str = "OUTBOUND"
+    attempt_number: int = 1
+    city: str = ""
+
+
+# ---------------------------------------------------------------------------
+# App lifespan
+# ---------------------------------------------------------------------------
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Runs AFTER uvicorn configures its own logging — our file handler won't be overwritten
     setup_logging("webhook")
     init_db()
-    logger.info("Imagica webhook server started")
+    logger.info("Imagica webhook server started (ElevenLabs + Twilio mode)")
     worker_task = asyncio.create_task(queue_worker())
     yield
     worker_task.cancel()
     logger.info("Imagica webhook server shutting down")
 
+
 app = FastAPI(title="Imagica Voice Agent Webhook", lifespan=lifespan)
 
+
+# ---------------------------------------------------------------------------
+# Static / health / dashboard
+# ---------------------------------------------------------------------------
 
 @app.get("/")
 async def dashboard():
     return FileResponse("dashboard.html")
+
+
+@app.get("/kaya")
+async def kaya_demo():
+    return FileResponse("kaya_demo.html")
+
+
+@app.get("/kaya/appointments")
+async def kaya_appointments_page():
+    return FileResponse("kaya_appointments.html")
+
+
+@app.get("/kaya/transcripts")
+async def kaya_transcripts_page():
+    return FileResponse("kaya_transcripts.html")
+
+
+@app.get("/api/kaya/appointments")
+async def api_kaya_appointments():
+    import sqlite3
+    conn = sqlite3.connect("post_call.db")
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute("SELECT * FROM kaya_bookings ORDER BY appointment_date, appointment_time").fetchall()
+    conn.close()
+    return JSONResponse({"appointments": [dict(r) for r in rows]})
+
+
+@app.get("/api/kaya/transcripts")
+async def api_kaya_transcripts():
+    import sqlite3
+    conn = sqlite3.connect("post_call.db")
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        "SELECT id, cart_id, customer_name, customer_phone, disposition, "
+        "duration_seconds, called_at, agent_type "
+        "FROM call_logs WHERE agent_type='kaya' ORDER BY id DESC"
+    ).fetchall()
+    conn.close()
+    return JSONResponse({"calls": [dict(r) for r in rows]})
+
+
+@app.get("/api/kaya/transcripts/{call_id}")
+async def api_kaya_transcript_detail(call_id: int):
+    import sqlite3, json
+    conn = sqlite3.connect("post_call.db")
+    conn.row_factory = sqlite3.Row
+    row = conn.execute(
+        "SELECT id, cart_id, customer_name, customer_phone, disposition, "
+        "transcript, duration_seconds, called_at "
+        "FROM call_logs WHERE id=? AND agent_type='kaya'", (call_id,)
+    ).fetchone()
+    conn.close()
+    if not row:
+        raise HTTPException(status_code=404, detail="Call not found")
+    data = dict(row)
+    try:
+        data["transcript"] = json.loads(data["transcript"] or "[]")
+    except Exception:
+        data["transcript"] = []
+    return JSONResponse(data)
 
 
 @app.get("/health")
@@ -123,87 +199,144 @@ async def health():
     return {"status": "ok"}
 
 
-@app.get("/token")
-async def get_room_token(room: str, identity: str = "developer"):
-    """Generate a LiveKit participant token for browser-mode joining."""
-    if not LIVEKIT_URL or LIVEKIT_URL == "ws://localhost:7880":
-        raise HTTPException(
-            status_code=500,
-            detail="LIVEKIT_URL is not set to a cloud URL in .env — browser join won't work. Set LIVEKIT_URL=wss://your-project.livekit.cloud",
+# ---------------------------------------------------------------------------
+# Twilio voice webhooks
+# ---------------------------------------------------------------------------
+
+@app.post("/twilio/answer")
+async def twilio_answer(
+    request: Request,
+    cart_id: str = Query(...),
+    agent_type: str = Query(default="imagica"),
+):
+    """
+    Twilio calls this URL when the customer answers.
+    Returns TwiML that opens a bidirectional media stream to our WebSocket handler.
+    If AMD detects a machine, hangs up instead.
+    """
+    form = await request.form()
+    call_sid = form.get("CallSid", "")
+    answered_by = form.get("AnsweredBy", "")
+
+    # AMD: hang up on voicemail / answering machine
+    if answered_by and answered_by not in ("human", "unknown"):
+        logger.info(f"[AMD] Voicemail detected (AnsweredBy={answered_by}) — hanging up call_sid={call_sid}")
+        return Response(
+            content='<?xml version="1.0" encoding="UTF-8"?><Response><Hangup/></Response>',
+            media_type="text/xml",
         )
-    token = (
-        AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET)
-        .with_identity(identity)
-        .with_name("Developer")
-        .with_grants(VideoGrants(room_join=True, room=room))
+
+    # Bind call_sid → cart_id for the WebSocket handler to look up
+    if call_sid and cart_id:
+        call_sessions[call_sid] = cart_id
+        logger.info(
+            f"[TWILIO] Answer: call_sid={call_sid} cart_id={cart_id} "
+            f"agent_type={agent_type} answered_by={answered_by or 'n/a'}"
+        )
+
+    base = BASE_URL.removeprefix("https://").removeprefix("http://")
+    stream_url = f"wss://{base}/twilio/media-stream?cart_id={cart_id}"
+    logger.info(f"[TWILIO] Stream URL → {stream_url}")
+    twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Connect>
+        <Stream url="{stream_url}" />
+    </Connect>
+</Response>"""
+    return Response(content=twiml, media_type="text/xml")
+
+
+@app.post("/twilio/status")
+async def twilio_status(request: Request):
+    """
+    Twilio posts call lifecycle events here (answered, completed, no-answer, busy, failed).
+    Used for logging and triggering retries on no-answer / busy.
+    """
+    form = await request.form()
+    call_sid = form.get("CallSid", "")
+    call_status = form.get("CallStatus", "")
+    answered_by = form.get("AnsweredBy", "")
+
+    logger.info(
+        f"[TWILIO STATUS] call_sid={call_sid} status={call_status} answered_by={answered_by or 'n/a'}"
     )
-    return {"token": token.to_jwt(), "livekit_url": LIVEKIT_URL, "room": room}
+
+    # Clean up session store on terminal states
+    if call_status in ("completed", "failed", "busy", "no-answer"):
+        cart_id = call_sessions.pop(call_sid, None)
+        if cart_id:
+            cart = cart_sessions.pop(cart_id, None)
+
+            # Retry on no-answer or busy only
+            if call_status in ("no-answer", "busy") and cart:
+                from retry import MAX_ATTEMPTS, schedule_retry
+                if cart.get("attempt_number", 1) < MAX_ATTEMPTS:
+                    logger.info(
+                        f"[TWILIO STATUS] Scheduling retry for cart_id={cart_id} "
+                        f"(attempt {cart.get('attempt_number', 1)} of {MAX_ATTEMPTS})"
+                    )
+                    asyncio.create_task(schedule_retry(cart))
+
+    return Response(content="", status_code=204)
 
 
-@app.get("/metrics")
-async def metrics():
-    return get_metrics()
+# ---------------------------------------------------------------------------
+# Twilio media stream WebSocket — bridges Twilio audio ↔ ElevenLabs
+# ---------------------------------------------------------------------------
+
+@app.websocket("/twilio/media-stream")
+async def twilio_media_stream(websocket: WebSocket):
+    """
+    Twilio connects here (from the <Stream> TwiML) and sends bidirectional µ-law audio.
+    Twilio strips URL query params from WebSocket upgrade requests, so we accept first,
+    read until the "start" event (which carries callSid), then look up the cart via
+    call_sessions[callSid]. Pre-read messages are passed to the handler for replay.
+    """
+    await websocket.accept()
+
+    preread: list[str] = []
+    cart = None
+    call_sid_ws = ""
+
+    try:
+        async for raw in websocket.iter_text():
+            preread.append(raw)
+            data = json.loads(raw)
+            if data.get("event") == "start":
+                call_sid_ws = data["start"].get("callSid", "")
+                cart_id = call_sessions.get(call_sid_ws, "")
+                cart = cart_sessions.get(cart_id)
+                break
+            if len(preread) >= 5:
+                break
+    except Exception as exc:
+        logger.error(f"[WS] Error reading start event: {exc}")
+
+    if not cart:
+        logger.warning(f"[WS] No cart found for call_sid={call_sid_ws!r} — closing")
+        await websocket.close(code=1008)
+        return
+
+    agent_type = cart.get("agent_type", "imagica")
+    await media_stream_handler(websocket, call_sid_ws, cart, agent_type=agent_type, preread=preread)
 
 
-@app.get("/calls")
-async def list_calls(limit: int = 20):
-    """List recent calls with transcript + latency summary."""
-    rows = get_call_logs()
-    out = []
-    for r in rows[:limit]:
-        import json as _json
-        transcript = []
-        try:
-            transcript = _json.loads(r.get("transcript") or "[]")
-        except Exception:
-            pass
-        turns = []
-        try:
-            turns = _json.loads(r.get("latency_per_turn") or "[]")
-        except Exception:
-            pass
-        out.append({
-            "id": r["id"],
-            "cart_id": r["cart_id"],
-            "customer": r["customer_name"],
-            "phone": r["customer_phone"],
-            "disposition": r["disposition"],
-            "attempt": r["attempt_number"],
-            "called_at": r["called_at"],
-            "first_response_ms": r.get("first_response_ms"),
-            "latency_avg_ms": round(sum(turns) / len(turns)) if turns else None,
-            "latency_per_turn_ms": turns,
-            "transcript_turns": len(transcript),
-            "transcript": transcript,
-        })
-    return {"calls": out}
-
-
-@app.get("/calls/{call_id}")
-async def call_detail(call_id: int):
-    """Full detail for one call — transcript, latency breakdown, tool calls."""
-    detail = get_call_detail(call_id)
-    if not detail:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=404, detail="Call not found")
-    return detail
-
+# ---------------------------------------------------------------------------
+# Cart abandonment webhook — enqueues the call
+# ---------------------------------------------------------------------------
 
 @app.post("/webhook/cart-abandoned")
 async def cart_abandoned(payload: CartAbandonedPayload):
     logger.info(
-        f"Received cart-abandoned event: cart_id={payload.cart_id} "
+        f"Received cart-abandoned: cart_id={payload.cart_id} "
         f"customer={payload.customer_name} phone={payload.customer_phone} "
         f"value=₹{payload.total_amount}"
     )
 
-    # DND check — always suppress regardless of calling hours
     if payload.customer_phone in DND_LIST:
         logger.info(f"DND suppressed: {payload.customer_phone}")
         return {"status": "suppressed", "reason": "DND list", "cart_id": payload.cart_id}
 
-    # Calling hours check: if outside 9 AM–9 PM IST, schedule for next window
-    # instead of dropping the call (fixes the working.md gap: "webhook at 11 PM is dropped")
     scheduled_at = None
     if not is_calling_hours():
         scheduled_at = next_calling_window()
@@ -231,13 +364,71 @@ async def cart_abandoned(payload: CartAbandonedPayload):
     }
 
 
+# ---------------------------------------------------------------------------
+# Kaya Clinic lead intake
+# ---------------------------------------------------------------------------
+
+@app.post("/webhook/kaya-lead")
+async def kaya_lead(payload: KayaLeadPayload):
+    logger.info(
+        f"Received kaya-lead: cart_id={payload.cart_id} "
+        f"customer={payload.customer_name} phone={payload.customer_phone}"
+    )
+
+    if payload.customer_phone in DND_LIST:
+        logger.info(f"DND suppressed: {payload.customer_phone}")
+        return {"status": "suppressed", "reason": "DND list", "cart_id": payload.cart_id}
+
+    scheduled_at = None
+    if not is_calling_hours():
+        scheduled_at = next_calling_window()
+        now_ist = datetime.now(IST).strftime("%H:%M IST")
+        logger.info(
+            f"Outside calling hours ({now_ist}) — cart_id={payload.cart_id} "
+            f"queued for next window at {scheduled_at} UTC"
+        )
+
+    enqueue_call(
+        cart_id=payload.cart_id,
+        customer_name=payload.customer_name,
+        customer_phone=payload.customer_phone,
+        cart_value=0,
+        cart_data_json=payload.model_dump_json(),
+        attempt_number=payload.attempt_number,
+        scheduled_at=scheduled_at,
+        agent_type="kaya",
+    )
+    return {
+        "status": "queued",
+        "cart_id": payload.cart_id,
+        "customer": payload.customer_name,
+        "agent_type": "kaya",
+        "scheduled_at": scheduled_at or "immediate",
+    }
+
+
+# ---------------------------------------------------------------------------
+# ElevenLabs post-call webhook
+# ---------------------------------------------------------------------------
+
+@app.post("/webhook/call-ended")
+async def call_ended(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    conversation_id = body.get("conversation_id", "unknown")
+    status = body.get("status", "unknown")
+    logger.info(f"[EL WEBHOOK] call-ended: conversation_id={conversation_id} status={status}")
+    return Response(content="", status_code=204)
+
+
+# ---------------------------------------------------------------------------
+# Internal retry endpoint (called by agent.py / voice_agent.py after NO_ANSWER/BUSY)
+# ---------------------------------------------------------------------------
+
 @app.post("/internal/schedule-retry")
 async def internal_schedule_retry(cart: dict):
-    """
-    Called by the agent subprocess after a NO_ANSWER/BUSY call.
-    Schedules the retry sleep + webhook re-fire inside uvicorn's event loop,
-    which stays alive long after the agent subprocess exits.
-    """
     asyncio.create_task(_delayed_retry(cart))
     logger.info(
         f"[RETRY] Scheduled attempt #{cart['attempt_number']} for "
@@ -246,69 +437,89 @@ async def internal_schedule_retry(cart: dict):
     return {"status": "retry_scheduled", "attempt_number": cart["attempt_number"]}
 
 
-async def _dispatch_and_dial(queue_row: dict) -> None:
-    """Create a LiveKit room, dispatch the agent, and optionally SIP-dial the customer.
+# ---------------------------------------------------------------------------
+# Outbound dialing via Twilio (replaces LiveKit SIP dial)
+# ---------------------------------------------------------------------------
 
-    Called by queue_worker for each dequeued call. Marks the queue row 'done' on
-    success or 'failed' on error so the dashboard can surface dispatch failures.
+async def dial_customer(cart: dict) -> str:
     """
+    Place an outbound call to the customer via Twilio.
+    Returns the Twilio call SID. Raises on API error.
+
+    machine_detection="Enable" activates AMD — Twilio will POST AnsweredBy to
+    /twilio/answer so we can hang up automatically on voicemail.
+    """
+    cart_id = cart["cart_id"]
+    phone = cart["customer_phone"]
+    agent_type = cart.get("agent_type", "imagica")
+
+    # Register cart data before dialling so the WebSocket handler can find it
+    cart_sessions[cart_id] = cart
+
+    answer_url = f"{BASE_URL}/twilio/answer?cart_id={cart_id}&agent_type={agent_type}"
+    status_url = f"{BASE_URL}/twilio/status"
+
+    call = twilio_client.calls.create(
+        to=phone,
+        from_=TWILIO_FROM_NUMBER,
+        url=answer_url,
+        status_callback=status_url,
+        status_callback_event=["answered", "completed", "no-answer", "busy", "failed"],
+        machine_detection="Enable",
+    )
+    logger.info(
+        f"[TWILIO] Outbound call placed: call_sid={call.sid} "
+        f"to={phone} cart_id={cart_id}"
+    )
+    return call.sid
+
+
+# ---------------------------------------------------------------------------
+# Queue worker — dequeues and dispatches highest-value pending calls
+# ---------------------------------------------------------------------------
+
+async def _dispatch_and_dial(queue_row: dict) -> None:
+    """Dequeue a call, build the cart dict, dial via Twilio."""
     queue_id = queue_row["id"]
     cart_id = queue_row["cart_id"]
     attempt_number = queue_row.get("attempt_number", 1)
+    agent_type = queue_row.get("agent_type", "imagica")
     payload_dict = json.loads(queue_row["cart_data"])
-    mode = payload_dict.get("mode", "browser")
 
-    room_name = f"imagica-{cart_id}-{attempt_number}"
-
-    # Enrich the raw payload into the cart_data shape that agent.py expects
-    cart_data = {
-        "customer_name": payload_dict["customer_name"],
-        "customer_phone": payload_dict["customer_phone"],
-        "cart_id": cart_id,
-        "visit_date": payload_dict["visit_date"],
-        "tickets": payload_dict["tickets"],
-        "total_amount": payload_dict["total_amount"],
-        "park_name": "Imagicaa Theme Park, Khopoli",
-        "booking_link": f"https://imagicaa.com/book?cart={cart_id}",
-        "attempt_number": attempt_number,
-        "call_placed_at": datetime.now().isoformat(),
-    }
+    if agent_type == "kaya":
+        cart_data = {
+            "agent_type": "kaya",
+            "customer_name": payload_dict["customer_name"],
+            "customer_phone": payload_dict["customer_phone"],
+            "cart_id": cart_id,
+            "city": payload_dict.get("city", ""),
+            "call_type": payload_dict.get("call_type", "OUTBOUND"),
+            "attempt_number": attempt_number,
+            "call_placed_at": datetime.now().isoformat(),
+        }
+    else:
+        cart_data = {
+            "agent_type": "imagica",
+            "customer_name": payload_dict["customer_name"],
+            "customer_phone": payload_dict["customer_phone"],
+            "cart_id": cart_id,
+            "visit_date": payload_dict["visit_date"],
+            "tickets": payload_dict["tickets"],
+            "total_amount": payload_dict["total_amount"],
+            "park_name": "Imagicaa Theme Park, Khopoli",
+            "booking_link": f"https://imagicaa.com/book?cart={cart_id}",
+            "attempt_number": attempt_number,
+            "call_placed_at": datetime.now().isoformat(),
+        }
 
     try:
-        async with lkapi.LiveKitAPI(
-            url=LIVEKIT_URL,
-            api_key=LIVEKIT_API_KEY,
-            api_secret=LIVEKIT_API_SECRET,
-        ) as lk:
-            await lk.room.create_room(
-                lkapi.CreateRoomRequest(name=room_name, empty_timeout=1800)
-            )
-            logger.info(f"[QUEUE] Room ready: {room_name}")
-
-            # Idempotency guard — delete stale dispatches before creating a new one
-            existing = await lk.agent_dispatch.list_dispatch(room_name)
-            for d in existing:
-                await lk.agent_dispatch.delete_dispatch(d.id, room_name)
-                logger.info(f"[QUEUE] Deleted stale dispatch {d.id} for {room_name}")
-
-            dispatch = await lk.agent_dispatch.create_dispatch(
-                lkapi.CreateAgentDispatchRequest(
-                    agent_name=AGENT_NAME,
-                    room=room_name,
-                    metadata=json.dumps(cart_data),
-                )
-            )
-            logger.info(
-                f"[QUEUE] Agent dispatched: dispatch_id={dispatch.id} "
-                f"room={room_name} customer={cart_data['customer_name']} "
-                f"value=₹{cart_data['total_amount']}"
-            )
-
+        call_sid = await dial_customer(cart_data)
         mark_queue_done(queue_id)
-
-        if mode == "phone":
-            asyncio.create_task(dial_customer(room_name, payload_dict["customer_phone"]))
-
+        logger.info(
+            f"[QUEUE] Call dispatched: call_sid={call_sid} "
+            f"cart_id={cart_id} customer={cart_data['customer_name']} "
+            f"value={'n/a' if agent_type == 'kaya' else cart_data['total_amount']} attempt={attempt_number}"
+        )
     except Exception as exc:
         logger.error(
             f"[QUEUE] Dispatch failed for cart_id={cart_id}: {exc}\n{traceback.format_exc()}"
@@ -317,12 +528,7 @@ async def _dispatch_and_dial(queue_row: dict) -> None:
 
 
 async def queue_worker() -> None:
-    """Background task: every 10 s, dispatch the highest-value pending call.
-
-    Priority is cart_value DESC (PRD §5.5) — a ₹15,000 family booking is always
-    dispatched before a ₹1,500 single ticket. Calls with a future scheduled_at
-    (e.g. outside calling hours) are skipped until their window opens.
-    """
+    """Background task: every 10 s, dispatch the highest-value pending call."""
     logger.info("[QUEUE] Worker started — polling every 10s")
     while True:
         await asyncio.sleep(10)
@@ -338,38 +544,6 @@ async def queue_worker() -> None:
             logger.error(f"[QUEUE] Worker error: {exc}")
 
 
-async def dial_customer(room_name: str, phone: str) -> None:
-    """
-    Place an outbound SIP call to the customer's phone and put them into room_name.
-    Runs as a background task — the webhook returns 200 immediately while this dials.
-    wait_until_answered=True holds the SIP leg open until the customer picks up,
-    so Priya only starts speaking after the call is answered (not during ringback).
-    No-op when LIVEKIT_SIP_TRUNK_ID is not set (playground / browser testing mode).
-    """
-    if not SIP_TRUNK_ID:
-        logger.info("LIVEKIT_SIP_TRUNK_ID not set — skipping SIP dial (playground mode)")
-        return
-    try:
-        async with lkapi.LiveKitAPI(
-            url=LIVEKIT_URL,
-            api_key=LIVEKIT_API_KEY,
-            api_secret=LIVEKIT_API_SECRET,
-        ) as lk:
-            await lk.sip.create_sip_participant(
-                lkapi.CreateSIPParticipantRequest(
-                    sip_trunk_id=SIP_TRUNK_ID,
-                    sip_call_to=phone,
-                    room_name=room_name,
-                    participant_identity="customer",
-                    participant_name="Customer",
-                    wait_until_answered=True,
-                )
-            )
-            logger.info(f"SIP call answered: {phone} joined {room_name}")
-    except Exception as exc:
-        logger.error(f"SIP dial failed for {phone} in {room_name}: {exc}")
-
-
 async def _delayed_retry(cart: dict) -> None:
     await asyncio.sleep(RETRY_DELAY_SECONDS)
     cart_id = cart["cart_id"]
@@ -382,6 +556,55 @@ async def _delayed_retry(cart: dict) -> None:
         logger.info(f"[RETRY] Attempt #{cart['attempt_number']} dispatched for cart_id={cart_id}")
     except Exception as exc:
         logger.error(f"[RETRY] Failed to re-fire webhook for cart_id={cart_id}: {exc}")
+
+
+# ---------------------------------------------------------------------------
+# Observability endpoints (unchanged from previous version)
+# ---------------------------------------------------------------------------
+
+@app.get("/metrics")
+async def metrics():
+    return get_metrics()
+
+
+@app.get("/calls")
+async def list_calls(limit: int = 20):
+    rows = get_call_logs()
+    out = []
+    for r in rows[:limit]:
+        transcript = []
+        turns = []
+        try:
+            transcript = json.loads(r.get("transcript") or "[]")
+        except Exception:
+            pass
+        try:
+            turns = json.loads(r.get("latency_per_turn") or "[]")
+        except Exception:
+            pass
+        out.append({
+            "id": r["id"],
+            "cart_id": r["cart_id"],
+            "customer": r["customer_name"],
+            "phone": r["customer_phone"],
+            "disposition": r["disposition"],
+            "attempt": r["attempt_number"],
+            "called_at": r["called_at"],
+            "first_response_ms": r.get("first_response_ms"),
+            "latency_avg_ms": round(sum(turns) / len(turns)) if turns else None,
+            "latency_per_turn_ms": turns,
+            "transcript_turns": len(transcript),
+            "transcript": transcript,
+        })
+    return {"calls": out}
+
+
+@app.get("/calls/{call_id}")
+async def call_detail(call_id: int):
+    detail = get_call_detail(call_id)
+    if not detail:
+        raise HTTPException(status_code=404, detail="Call not found")
+    return detail
 
 
 if __name__ == "__main__":

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaya Clinic — Request a Call</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --kaya-teal:     #00867d;
+      --kaya-dark:     #005f58;
+      --kaya-light:    #e6f5f4;
+      --kaya-accent:   #f0a500;
+      --text-dark:     #1a1a2e;
+      --text-mid:      #4a5568;
+      --text-light:    #718096;
+      --border:        #d1e8e6;
+      --white:         #ffffff;
+      --radius:        12px;
+      --shadow:        0 4px 24px rgba(0,134,125,0.10);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f0faf9 0%, #e8f5f4 50%, #f5f0ff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .card-header {
+      background: linear-gradient(135deg, var(--kaya-teal) 0%, var(--kaya-dark) 100%);
+      padding: 32px 32px 28px;
+      color: var(--white);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .brand-tagline {
+      font-size: 11px;
+      opacity: 0.75;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .card-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .card-header p {
+      font-size: 14px;
+      opacity: 0.85;
+      line-height: 1.5;
+    }
+
+    /* Form body */
+    .card-body {
+      padding: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 7px;
+      letter-spacing: 0.2px;
+    }
+    label .required { color: #e53e3e; margin-left: 2px; }
+    label .optional {
+      color: var(--text-light);
+      font-weight: 400;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 15px;
+      color: var(--text-dark);
+      background: #fafcfc;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--kaya-teal);
+      box-shadow: 0 0 0 3px rgba(0,134,125,0.12);
+      background: var(--white);
+    }
+    input.error { border-color: #e53e3e; }
+    input.error:focus { box-shadow: 0 0 0 3px rgba(229,62,62,0.12); }
+
+    .phone-row {
+      display: flex;
+      gap: 8px;
+    }
+    .phone-prefix {
+      flex: 0 0 72px;
+      font-weight: 600;
+      color: var(--text-mid);
+      background: var(--kaya-light);
+      border-color: var(--border);
+      cursor: default;
+      text-align: center;
+    }
+    .phone-row input { flex: 1; }
+
+    .hint {
+      margin-top: 5px;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    select option { color: var(--text-dark); }
+    select option[value=""] { color: var(--text-light); }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--kaya-teal) 0%, var(--kaya-dark) 100%);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: opacity 0.2s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .btn-submit:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
+    .btn-submit:active:not(:disabled) { transform: translateY(0); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Status banner */
+    .status {
+      margin-top: 20px;
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      font-size: 14px;
+      line-height: 1.6;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .status.success {
+      background: #f0faf9;
+      border: 1.5px solid #9ecfc9;
+      color: var(--kaya-dark);
+    }
+    .status.error {
+      background: #fff5f5;
+      border: 1.5px solid #feb2b2;
+      color: #c53030;
+    }
+
+    .status-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+    .status strong { display: block; font-size: 15px; margin-bottom: 4px; }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(0,134,125,0.15);
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    .meta-row code {
+      background: var(--kaya-light);
+      color: var(--kaya-dark);
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .timeline {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .timeline-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--text-mid);
+    }
+    .timeline-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--kaya-teal);
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .timeline-dot.pending { background: #cbd5e0; }
+
+    /* Footer */
+    .card-footer {
+      padding: 14px 32px 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-light);
+      border-top: 1px solid #f0f0f0;
+    }
+    .card-footer a { color: var(--kaya-teal); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="brand">
+      <div class="brand-icon">🌿</div>
+      <div>
+        <div class="brand-name">Kaya Clinic</div>
+        <div class="brand-tagline">Expert Dermatology Care</div>
+      </div>
+    </div>
+    <h1>Request a Callback</h1>
+    <p>Fill in your details and our voice agent Priya will call you to schedule your appointment.</p>
+  </div>
+
+  <div class="card-body">
+    <form id="callForm" novalidate>
+
+      <div class="form-group">
+        <label for="name">Full Name <span class="required">*</span></label>
+        <input
+          type="text"
+          id="name"
+          placeholder="e.g. Bhavesh Tank"
+          autocomplete="name"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Mobile Number <span class="required">*</span></label>
+        <div class="phone-row">
+          <input class="phone-prefix" value="+91" readonly tabindex="-1" />
+          <input
+            type="tel"
+            id="phone"
+            placeholder="98765 43210"
+            maxlength="10"
+            inputmode="numeric"
+            pattern="[6-9][0-9]{9}"
+            autocomplete="tel"
+            required
+          />
+        </div>
+        <div class="hint">10-digit Indian mobile number</div>
+      </div>
+
+      <div class="form-group">
+        <label for="city">
+          City <span class="optional">(optional — helps suggest nearby branches)</span>
+        </label>
+        <select id="city">
+          <option value="">Select your city</option>
+          <optgroup label="Metro Cities">
+            <option>Mumbai</option>
+            <option>Delhi</option>
+            <option>Bengaluru</option>
+            <option>Hyderabad</option>
+            <option>Chennai</option>
+            <option>Kolkata</option>
+            <option>Pune</option>
+          </optgroup>
+          <optgroup label="Other Cities">
+            <option>Ahmedabad</option>
+            <option>Surat</option>
+            <option>Coimbatore</option>
+            <option>Vadodara</option>
+            <option>Chandigarh</option>
+            <option>Nagpur</option>
+            <option>Siliguri</option>
+            <option>Guwahati</option>
+            <option>Ludhiana</option>
+            <option>Jaipur</option>
+            <option>Lucknow</option>
+            <option>Kochi</option>
+            <option>Indore</option>
+            <option>Visakhapatnam</option>
+            <option>Navi Mumbai</option>
+            <option>Thane</option>
+            <option>Noida</option>
+            <option>Gurugram</option>
+            <option>Faridabad</option>
+            <option>Jalandhar</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <span class="spinner" id="spinner"></span>
+        <span id="btnText">📞 Request Call</span>
+      </button>
+
+      <div class="status" id="statusBox"></div>
+
+    </form>
+  </div>
+
+  <div class="card-footer">
+    Calls are made between <strong>9 AM – 9 PM IST</strong> only
+  </div>
+</div>
+
+<script>
+  const form     = document.getElementById('callForm');
+  const nameEl   = document.getElementById('name');
+  const phoneEl  = document.getElementById('phone');
+  const cityEl   = document.getElementById('city');
+  const btn      = document.getElementById('submitBtn');
+  const spinner  = document.getElementById('spinner');
+  const btnText  = document.getElementById('btnText');
+  const statusBox = document.getElementById('statusBox');
+
+  // Only allow digits in phone field
+  phoneEl.addEventListener('input', () => {
+    phoneEl.value = phoneEl.value.replace(/\D/g, '').slice(0, 10);
+  });
+
+  function validate() {
+    let ok = true;
+    nameEl.classList.remove('error');
+    phoneEl.classList.remove('error');
+
+    if (!nameEl.value.trim()) {
+      nameEl.classList.add('error');
+      ok = false;
+    }
+    const phone = phoneEl.value.trim();
+    if (!/^[6-9][0-9]{9}$/.test(phone)) {
+      phoneEl.classList.add('error');
+      ok = false;
+    }
+    return ok;
+  }
+
+  function generateCustomerId(name) {
+    const safeName = name.trim().split(' ')[0].toUpperCase().replace(/[^A-Z]/g, '');
+    const ts = Date.now().toString(36).toUpperCase();
+    return `CUST-${safeName}-${ts}`;
+  }
+
+  function setLoading(loading) {
+    btn.disabled = loading;
+    spinner.style.display = loading ? 'block' : 'none';
+    btnText.textContent   = loading ? 'Calling...' : '📞 Request Call';
+  }
+
+  function showStatus(type, html) {
+    statusBox.className = `status ${type}`;
+    statusBox.innerHTML = html;
+    statusBox.style.display = 'block';
+    statusBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    statusBox.style.display = 'none';
+
+    if (!validate()) {
+      showStatus('error', `
+        <span class="status-icon">⚠️</span>
+        <strong>Please fix the highlighted fields</strong>
+        Enter your full name and a valid 10-digit mobile number.
+      `);
+      return;
+    }
+
+    const name    = nameEl.value.trim();
+    const phone   = '+91' + phoneEl.value.trim();
+    const city    = cityEl.value;
+    const customerId = generateCustomerId(name);
+    const firstName = name.split(' ')[0];
+
+    setLoading(true);
+
+    try {
+      const resp = await fetch('/webhook/kaya-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: firstName,
+          customer_phone: phone,
+          cart_id: customerId,
+          call_type: 'OUTBOUND',
+          city: city,
+          attempt_number: 1,
+        }),
+      });
+
+      const data = await resp.json();
+
+      if (resp.ok && data.status === 'queued') {
+        showStatus('success', `
+          <span class="status-icon">✅</span>
+          <strong>You're all set, ${firstName}!</strong>
+          Priya from Kaya Clinic will call <strong>${phone}</strong> shortly to help schedule your appointment.
+          <div class="meta-row">
+            Customer ID: <code>${customerId}</code>
+          </div>
+          <div class="timeline">
+            <div class="timeline-step"><div class="timeline-dot"></div><span>Call queued — picked up within 10 seconds</span></div>
+            <div class="timeline-step"><div class="timeline-dot"></div><span>Your phone will ring from <strong>+1 318 504 3576</strong></span></div>
+            <div class="timeline-step"><div class="timeline-dot pending"></div><span>Priya will guide you through booking your appointment</span></div>
+          </div>
+        `);
+        form.reset();
+      } else if (data.status === 'suppressed') {
+        showStatus('error', `
+          <span class="status-icon">🚫</span>
+          <strong>Number on DND list</strong>
+          This number is registered on the Do Not Disturb list and cannot be called.
+        `);
+      } else {
+        throw new Error(data.detail || JSON.stringify(data));
+      }
+
+    } catch (err) {
+      showStatus('error', `
+        <span class="status-icon">❌</span>
+        <strong>Something went wrong</strong>
+        ${err.message || 'Could not connect to the server. Make sure main.py is running.'}
+      `);
+    } finally {
+      setLoading(false);
+    }
+  });
+</script>
+</body>
+</html>

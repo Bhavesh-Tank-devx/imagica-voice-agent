@@ -26,6 +26,7 @@ DISPOSITION_TRANSFERRED = "TRANSFERRED_TO_HUMAN"            # escalated to human
 DISPOSITION_TECHNICAL_FAILURE = "TECHNICAL_FAILURE"         # call dropped / Gemini error
 DISPOSITION_WRONG_NUMBER = "WRONG_NUMBER"                   # customer confirmed wrong number
 DISPOSITION_DND_BLOCKED = "DND_BLOCKED"                     # suppressed before dial (DND/calling hours)
+DISPOSITION_CALL_COMPLETED_NO_OUTCOME = "CALL_COMPLETED_NO_OUTCOME"  # call lasted >60s but no booking/tool outcome
 
 # Internal retry states — used by retry.py to decide whether to retry.
 # These are never logged to the CRM as final dispositions; they get
@@ -77,14 +78,41 @@ def init_db():
         "CREATE INDEX IF NOT EXISTS idx_queue_priority "
         "ON call_queue(status, cart_value DESC, scheduled_at)"
     )
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS call_sessions (
+            conversation_id TEXT PRIMARY KEY,
+            cart_data       TEXT NOT NULL,   -- JSON cart dict
+            initiated_at    TEXT NOT NULL,
+            tool_calls      TEXT DEFAULT '[]',
+            discount        REAL DEFAULT 0
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS kaya_bookings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cart_id TEXT NOT NULL,
+            customer_first_name TEXT,
+            customer_last_name TEXT,
+            customer_phone TEXT,
+            customer_email TEXT,
+            dob TEXT,
+            pincode TEXT,
+            city TEXT,
+            branch_name TEXT,
+            appointment_date TEXT,
+            appointment_time TEXT,
+            concern_summary TEXT,
+            booked_at TEXT DEFAULT (datetime('now'))
+        )
+    """)
     conn.commit()
     _migrate_db(conn)
     conn.close()
 
 
 def _migrate_db(conn: sqlite3.Connection) -> None:
-    """Add any new columns to an existing table. Safe to run on every startup."""
-    new_columns = [
+    """Add any new columns to existing tables. Safe to run on every startup."""
+    call_logs_columns = [
         ("call_placed_at", "TEXT"),
         ("call_connected_at", "TEXT"),
         ("first_response_ms", "INTEGER"),
@@ -92,13 +120,24 @@ def _migrate_db(conn: sqlite3.Connection) -> None:
         ("language_detected", "TEXT"),
         ("latency_per_turn", "TEXT"),
         ("duration_seconds", "INTEGER"),
+        ("agent_type", "TEXT DEFAULT 'imagica'"),
     ]
-    for col, col_type in new_columns:
+    for col, col_type in call_logs_columns:
         try:
             conn.execute(f"ALTER TABLE call_logs ADD COLUMN {col} {col_type}")
             conn.commit()
         except sqlite3.OperationalError:
             pass  # column already exists
+
+    call_queue_columns = [
+        ("agent_type", "TEXT DEFAULT 'imagica'"),
+    ]
+    for col, col_type in call_queue_columns:
+        try:
+            conn.execute(f"ALTER TABLE call_queue ADD COLUMN {col} {col_type}")
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass
 
 
 def log_call(
@@ -115,6 +154,7 @@ def log_call(
     language_detected: str | None = None,
     latency_per_turn: list | None = None,
     duration_sec: int = 0,
+    agent_type: str | None = None,
 ):
     """
     Write a call outcome record to the local SQLite DB.
@@ -141,8 +181,8 @@ def log_call(
         (cart_id, customer_name, customer_phone, disposition, transcript,
          summary, discount_applied, attempt_number, called_at, ended_at,
          call_placed_at, call_connected_at, first_response_ms, tool_calls, language_detected,
-         latency_per_turn, duration_seconds)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         latency_per_turn, duration_seconds, agent_type)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             cart["cart_id"],
@@ -162,6 +202,7 @@ def log_call(
             language_detected or "unknown",
             json.dumps(latency_per_turn or []),
             duration_sec,
+            agent_type or cart.get("agent_type", "imagica"),
         ),
     )
     conn.commit()
@@ -223,6 +264,7 @@ def enqueue_call(
     cart_data_json: str,
     attempt_number: int = 1,
     scheduled_at: str | None = None,
+    agent_type: str = "imagica",
 ) -> int:
     """Insert or upsert a call into the priority queue. Returns the queue row id.
 
@@ -233,17 +275,18 @@ def enqueue_call(
     cur = conn.execute(
         """
         INSERT INTO call_queue
-            (cart_id, customer_name, customer_phone, cart_value, cart_data, attempt_number, scheduled_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+            (cart_id, customer_name, customer_phone, cart_value, cart_data, attempt_number, scheduled_at, agent_type)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(cart_id) DO UPDATE SET
             cart_data      = excluded.cart_data,
             attempt_number = excluded.attempt_number,
             cart_value     = excluded.cart_value,
             status         = 'pending',
             scheduled_at   = excluded.scheduled_at,
+            agent_type     = excluded.agent_type,
             updated_at     = datetime('now')
         """,
-        (cart_id, customer_name, customer_phone, cart_value, cart_data_json, attempt_number, scheduled_at),
+        (cart_id, customer_name, customer_phone, cart_value, cart_data_json, attempt_number, scheduled_at, agent_type),
     )
     queue_id = cur.lastrowid
     conn.commit()
@@ -415,3 +458,115 @@ def get_metrics() -> dict:
             for r in attempt_rows
         ],
     }
+
+
+# ---------------------------------------------------------------------------
+# Call session persistence (survives server restarts)
+# ---------------------------------------------------------------------------
+
+def save_session(conversation_id: str, cart: dict, initiated_at: str) -> None:
+    """Persist a new call session to SQLite when the call is initiated."""
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        """
+        INSERT OR REPLACE INTO call_sessions
+            (conversation_id, cart_data, initiated_at, tool_calls, discount)
+        VALUES (?, ?, ?, '[]', 0)
+        """,
+        (conversation_id, json.dumps(cart), initiated_at),
+    )
+    conn.commit()
+    conn.close()
+
+
+def append_tool_call(conversation_id: str, tool_entry: dict) -> None:
+    """Add a tool call record to an existing session."""
+    conn = sqlite3.connect(DB_PATH)
+    row = conn.execute(
+        "SELECT tool_calls, discount FROM call_sessions WHERE conversation_id = ?",
+        (conversation_id,),
+    ).fetchone()
+    if not row:
+        conn.close()
+        return
+    tool_calls = json.loads(row[0])
+    tool_calls.append(tool_entry)
+    discount = tool_entry.get("discount_percent", row[1])
+    conn.execute(
+        "UPDATE call_sessions SET tool_calls = ?, discount = ? WHERE conversation_id = ?",
+        (json.dumps(tool_calls), discount, conversation_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_session(conversation_id: str) -> dict | None:
+    """Load a session dict; returns None if not found."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    row = conn.execute(
+        "SELECT * FROM call_sessions WHERE conversation_id = ?",
+        (conversation_id,),
+    ).fetchone()
+    conn.close()
+    if not row:
+        return None
+    return {
+        "cart": json.loads(row["cart_data"]),
+        "initiated_at": row["initiated_at"],
+        "tool_calls": json.loads(row["tool_calls"]),
+        "discount": row["discount"],
+    }
+
+
+def delete_session(conversation_id: str) -> None:
+    """Remove a session after the call has been logged."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        "DELETE FROM call_sessions WHERE conversation_id = ?",
+        (conversation_id,),
+    )
+    conn.commit()
+    conn.close()
+
+
+def log_kaya_booking(
+    cart_id: str,
+    customer_phone: str,
+    first_name: str,
+    last_name: str,
+    email: str,
+    pincode: str,
+    branch_name: str,
+    appointment_date: str,
+    appointment_time: str,
+    dob: str = "",
+    city: str = "",
+    concern_summary: str = "",
+) -> int:
+    """Write a confirmed Kaya appointment to kaya_bookings. Returns the new row id."""
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.execute(
+        """
+        INSERT INTO kaya_bookings
+            (cart_id, customer_first_name, customer_last_name, customer_phone,
+             customer_email, dob, pincode, city, branch_name,
+             appointment_date, appointment_time, concern_summary)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            cart_id, first_name, last_name, customer_phone,
+            email, dob, pincode, city, branch_name,
+            appointment_date, appointment_time, concern_summary,
+        ),
+    )
+    booking_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    logger.info(
+        f"[KAYA BOOKING] id={booking_id} cart_id={cart_id} "
+        f"branch={branch_name} date={appointment_date} {appointment_time}"
+    )
+    return booking_id
