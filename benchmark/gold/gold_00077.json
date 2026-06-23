@@ -1,0 +1,74 @@
+{
+  "_source_call_id": 77,
+  "_recorded_disposition": "INTERESTED_LINK_SENT",
+  "_suggested": true,
+  "goal": "get a booking link / proceed",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Astha ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 12 April 2026 ke liye tickets cart mein add kiye the — 2 Adult, 2 Child ke liye. Booking complete nahi hui thi, toh socha aapko ek baar remind kar doon. Koi problem thi kya?",
+      "ts": "2026-03-27T14:09:11.273489"
+    },
+    {
+      "role": "user",
+      "text": "हां, यार। थोड़ी एक्सपेंसिव लग रही थी टिकट। तो, मैं देख रही हूं।",
+      "ts": "2026-03-27T14:09:32.221951"
+    },
+    {
+      "role": "user",
+      "text": "kar sakte hai toh.",
+      "ts": "2026-03-27T14:09:36.110224"
+    },
+    {
+      "role": "agent",
+      "text": "Haan, total ₹4796 rupees hain. Kya koi specific concern hai?",
+      "ts": "2026-03-27T14:09:34.860529"
+    },
+    {
+      "role": "user",
+      "text": "Namanala na ki the mahangi the kit s.",
+      "ts": "2026-03-27T14:09:49.422363"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha, theek hai. Main aapko is par ek discount offer kar sakti hoon. Kya aap 10% discount chahenge?",
+      "ts": "2026-03-27T14:09:47.911545"
+    },
+    {
+      "role": "user",
+      "text": "ha",
+      "ts": "2026-03-27T14:10:00.069539"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, maine 10% discount apply kar diya hai. Ab aapka total ho gaya hai ₹4316. Maine updated link aapko SMS pe bhej diya",
+      "ts": "2026-03-27T14:10:01.610297"
+    },
+    {
+      "role": "user",
+      "text": "લેكين હલો",
+      "ts": "2026-03-27T14:10:12.416174"
+    },
+    {
+      "role": "user",
+      "text": "SMS, 2:30, 9:20, 9:20 discount, offer",
+      "ts": "2026-03-27T14:10:21.911377"
+    },
+    {
+      "role": "agent",
+      "text": "Abhi filhaal koi card discount to available nahi hai, but jo 10% discount maine aapko offer kiya hai, woh aap use kar sakte hain. Kya main booking ke sath aage badhoon?",
+      "ts": "2026-03-27T14:10:19.704760"
+    },
+    {
+      "role": "user",
+      "text": "Done done. Let's do this.",
+      "ts": "2026-03-27T14:10:32.922241"
+    },
+    {
+      "role": "agent",
+      "text": "Great! Maine booking link aapko SMS pe bhej diya hai. Aap wahan se complete kar lijiye. Have a great day!",
+      "ts": "2026-03-27T14:10:33.888251"
+    }
+  ]
+}

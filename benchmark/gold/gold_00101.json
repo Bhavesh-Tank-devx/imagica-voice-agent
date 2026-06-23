@@ -1,0 +1,254 @@
+{
+  "_source_call_id": 101,
+  "_recorded_disposition": "CALL_COMPLETED_NO_OUTCOME",
+  "_suggested": false,
+  "goal": "(unclear — no decisive outcome)",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello Astha , I am Priya from Kaya Clinic. Is this right time to talk to you?",
+      "ts": "2026-06-03T12:26:33.898181"
+    },
+    {
+      "role": "user",
+      "text": "Yes.",
+      "ts": "2026-06-03T12:26:42.150503"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Great! You recently filled out a form on our website. Could you tell me about the concern you'd like to address — skin, hair, or something else?",
+      "ts": "2026-06-03T12:26:43.802044"
+    },
+    {
+      "role": "user",
+      "text": "Or stuff of...",
+      "ts": "2026-06-03T12:26:54.249106"
+    },
+    {
+      "role": "agent",
+      "text": "...",
+      "ts": "2026-06-03T12:26:54.461635"
+    },
+    {
+      "role": "user",
+      "text": "Conform about a minute.",
+      "ts": "2026-06-03T12:26:57.420460"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] I didn't quite catch that. Could you please repeat your concern, or tell me if you're looking for solutions for skin, hair, or something else?",
+      "ts": "2026-06-03T12:26:59.053070"
+    },
+    {
+      "role": "user",
+      "text": "Yeah, yeah. I was actually looking out for skin",
+      "ts": "2026-06-03T12:27:11.593418"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] We have many excellent skin treatments. Our dermatologist will evaluate your specific concerns and create a personalized plan for you. May I have your last name, please?\n",
+      "ts": "2026-06-03T12:27:13.824164"
+    },
+    {
+      "role": "user",
+      "text": "Mm-hmm. Mundra.",
+      "ts": "2026-06-03T12:27:25.975250"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you, Astha Mundra. Which city are you based in?\n",
+      "ts": "2026-06-03T12:27:26.494358"
+    },
+    {
+      "role": "user",
+      "text": "M-U-N-D-H-A-R-A.",
+      "ts": "2026-06-03T12:27:30.880285"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you for spelling that out. So, your full name is Astha Mundhara. Which city are you based in?\n",
+      "ts": "2026-06-03T12:27:32.404190"
+    },
+    {
+      "role": "user",
+      "text": "Surat.",
+      "ts": "2026-06-03T12:27:41.683384"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Just to confirm, you're looking for a branch in Surat, right?\n",
+      "ts": "2026-06-03T12:27:42.230087"
+    },
+    {
+      "role": "user",
+      "text": "Yes, of course.",
+      "ts": "2026-06-03T12:27:51.264500"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] In Surat, we have two branches: Vesu and Ghod Dod Road. Which one would be more convenient for you?\n",
+      "ts": "2026-06-03T12:27:52.896093"
+    },
+    {
+      "role": "user",
+      "text": "What about in Mumbai? Do you have any other branchin Mumbai?",
+      "ts": "2026-06-03T12:28:02.808544"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Yes, we have several branches in Mumbai. Do you have a preferred area in Mumbai, or would you like me to list a couple of the nearest ones?\n",
+      "ts": "2026-06-03T12:28:04.174537"
+    },
+    {
+      "role": "user",
+      "text": "Yeah, somewhere near Andheri, Lokhandwala.",
+      "ts": "2026-06-03T12:28:13.959101"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] We have branches in Andheri and Lokhandwala. I'll note your appointment at our Andheri branch in Mumbai. What date and time would you prefer for your consultation?\n",
+      "ts": "2026-06-03T12:28:16.217788"
+    },
+    {
+      "role": "user",
+      "text": "Uh, tomorrow 3:00 PM.",
+      "ts": "2026-06-03T12:28:29.800331"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] So that's Thursday, June 4th, at 3:00 PM. Does that sound right?\n",
+      "ts": "2026-06-03T12:28:30.342539"
+    },
+    {
+      "role": "user",
+      "text": "Yes, yes. Perfect.",
+      "ts": "2026-06-03T12:28:40.772186"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] A basic consultation is completely free; if a detailed medical evaluation is needed, the fee is Rs. 750. What is your email address?\n",
+      "ts": "2026-06-03T12:28:42.783643"
+    },
+    {
+      "role": "user",
+      "text": "Oh, nice.",
+      "ts": "2026-06-03T12:28:47.579306"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] ...evaluation is needed, the fee is Rs. 750. What is your email address?\n",
+      "ts": "2026-06-03T12:28:48.462130"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] What is your email address?\n",
+      "ts": "2026-06-03T12:28:54.203980"
+    },
+    {
+      "role": "user",
+      "text": "Uh,",
+      "ts": "2026-06-03T12:28:54.531574"
+    },
+    {
+      "role": "user",
+      "text": "Yeah, may, may, may we have email address",
+      "ts": "2026-06-03T12:29:03.958032"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Yes, I need your email address to send you the appointment confirmation. Could you please share it with me?\n",
+      "ts": "2026-06-03T12:29:05.226636"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Please go ahead.\n",
+      "ts": "2026-06-03T12:29:21.301266"
+    },
+    {
+      "role": "user",
+      "text": "Yes, yes. So my email address-",
+      "ts": "2026-06-03T12:29:21.642061"
+    },
+    {
+      "role": "user",
+      "text": "...potfuldevex@gmail.com.",
+      "ts": "2026-06-03T12:29:31.418585"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you. Could you please spell out the part before '@gmail.com' for me, just to ensure accuracy?\n",
+      "ts": "2026-06-03T12:29:32.327942"
+    },
+    {
+      "role": "user",
+      "text": "Yes. C... No, no. H-O-T-C-O-O-L-D-E-V-X.",
+      "ts": "2026-06-03T12:29:47.848628"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Got it. So that's H-O-T-C-O-O-L-D-E-V-X at gmail dot com. Is that correct?\n",
+      "ts": "2026-06-03T12:29:50.024032"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] And your date of birth, please?\n",
+      "ts": "2026-06-03T12:30:04.817991"
+    },
+    {
+      "role": "user",
+      "text": "Perfect. Perfect. Perfect.",
+      "ts": "2026-06-03T12:30:05.203467"
+    },
+    {
+      "role": "user",
+      "text": "Date of birth is 28th May,2000.",
+      "ts": "2026-06-03T12:30:13.710460"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you. And what is your 6-digit pin code?\n",
+      "ts": "2026-06-03T12:30:14.167342"
+    },
+    {
+      "role": "user",
+      "text": "Six digit pin code? Yeah, yeah, I don't know. I don't know.",
+      "ts": "2026-06-03T12:30:26.180274"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] No problem at all. You can usually find it on your address proof or by searching on Google Maps for your area. Would you like to try looking it up, or should I proceed with 000000 as a placeholder for now?\n",
+      "ts": "2026-06-03T12:30:29.333669"
+    },
+    {
+      "role": "user",
+      "text": "No, no, you can use that.Yeah, yeah. I've given you Mumbai Lokhandwala, so check the pin code and just confirm the booking. I don't have time now.",
+      "ts": "2026-06-03T12:30:46.650220"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] I understand. I will use a default pin code for now and you can update it later at the clinic. Did someone refer you to Kaya, or did you find us yourself?\n",
+      "ts": "2026-06-03T12:30:48.317985"
+    },
+    {
+      "role": "user",
+      "text": "Uh, yeah. Yeah, yeah, my friend, Bhavish, referred me to Kaya.",
+      "ts": "2026-06-03T12:30:59.871841"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] That's wonderful! Could you please provide your friend Bhavish's registered mobile number so we can make a note of the referral?\n",
+      "ts": "2026-06-03T12:31:01.656084"
+    },
+    {
+      "role": "user",
+      "text": "Yeah, yeah. Will this referral u- be usedsomewhere? Can I get some discount with this referral?",
+      "ts": "2026-06-03T12:31:18.730379"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] The referral helps us acknowledge Bhavish, but for any discounts or offers, our clinic staff will be able to guide you during your visit.\n",
+      "ts": "2026-06-03T12:31:20.472616"
+    }
+  ]
+}

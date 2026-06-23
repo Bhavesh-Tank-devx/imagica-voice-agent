@@ -1,0 +1,74 @@
+{
+  "_source_call_id": 48,
+  "_recorded_disposition": "INTERESTED_LINK_SENT",
+  "_suggested": true,
+  "goal": "get a booking link / proceed",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, LoadUser3 ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 15 May 2026 ke liye tickets cart mein add kiye the — 2 Adult ke liye. Booking complete nahi hui thi, toh socha ek baar remind kar doon. Koi problem thi kya?",
+      "ts": "2026-03-27T11:30:53.499247"
+    },
+    {
+      "role": "user",
+      "text": "टिकट बहुत और प्राइस लग रही थी, एंड देन आई चेक माय शेड्यूल और आई एम नॉट अवेलेबल ऑन 15 मे।",
+      "ts": "2026-03-27T11:31:20.899981"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha, theek hai. Toh price ka issue tha aur aap 15 May ko free nahi hain. Koi baat nahi. Kya hum kisi aur date ke liye check kar sakte hain?",
+      "ts": "2026-03-27T11:31:18.646841"
+    },
+    {
+      "role": "user",
+      "text": "Check for 15th April and",
+      "ts": "2026-03-27T11:31:37.875537"
+    },
+    {
+      "role": "agent",
+      "text": "15th April ke liye main check kar sakti hoon. Price ki baat hai toh main aapko ek chhota sa discount offer kar sakti hoon, 10% tak. Kya usse help milegi?",
+      "ts": "2026-03-27T11:31:35.806278"
+    },
+    {
+      "role": "user",
+      "text": "It will be good, if you give me 20% discount.",
+      "ts": "2026-03-27T11:31:52.318308"
+    },
+    {
+      "role": "agent",
+      "text": "I'm sorry, main maximum 10% ka hi discount de sakti hoon. Usse zyada possible nahi hai. Kya aap 10% discount ke saath consider karenge?",
+      "ts": "2026-03-27T11:31:50.283364"
+    },
+    {
+      "role": "user",
+      "text": "Okay cool, go with it.",
+      "ts": "2026-03-27T11:32:01.222556"
+    },
+    {
+      "role": "agent",
+      "text": "Great! Maine aapko 10% discount ke saath link bhej diya hai SMS pe. Aap check kar lijiye aur booking complete kar sakte hain.",
+      "ts": "2026-03-27T11:32:02.845384"
+    },
+    {
+      "role": "user",
+      "text": "हां, मैं अपने टाइम निकाल के बुक कर दूंगा।",
+      "ts": "2026-03-27T11:32:18.984344"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai! Maine link aapko fir se bhej diya hai. Jab bhi time mile, aap book kar lena. Thank you!",
+      "ts": "2026-03-27T11:32:19.938465"
+    },
+    {
+      "role": "user",
+      "text": "भाई.",
+      "ts": "2026-03-27T11:32:30.114101"
+    },
+    {
+      "role": "agent",
+      "text": "Bye! Have a great day!",
+      "ts": "2026-03-27T11:32:29.714549"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "_source_call_id": 45,
+  "_recorded_disposition": "INTERESTED_LINK_SENT",
+  "_suggested": true,
+  "goal": "get a booking link / proceed",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Bhavesh ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 12 April",
+      "ts": "2026-03-27T10:24:01.547742"
+    },
+    {
+      "role": "user",
+      "text": "भो the and",
+      "ts": "2026-03-27T10:24:09.820545"
+    },
+    {
+      "role": "agent",
+      "text": "Haan, Khopoli wala park hi hai. Kya aapko price ka issue lag raha tha?",
+      "ts": "2026-03-27T10:24:08.812739"
+    },
+    {
+      "role": "user",
+      "text": "Аха.",
+      "ts": "2026-03-27T10:24:18.086018"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, maine aapko 10% discount apply kar diya hai. Ab total amount ₹4316 ho gaya hai. Maine aapko naya booking link bhej diya hai SMS pe. Aap check kar sakte hain?",
+      "ts": "2026-03-27T10:24:19.749553"
+    },
+    {
+      "role": "user",
+      "text": "Haan, but I am not available on that date.",
+      "ts": "2026-03-27T10:24:37.435097"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha, theek hai. Koi baat nahi. Aap kaun se date pe available rahenge? Hum uske hisaab se booking change kar sakte hain.",
+      "ts": "2026-03-27T10:24:35.895583"
+    },
+    {
+      "role": "user",
+      "text": "Not sure right now.",
+      "ts": "2026-03-27T10:24:47.072095"
+    },
+    {
+      "role": "agent",
+      "text": "Koi baat nahi. Jab aap decide kar lein, toh bata dijiyega. Main aapko link bhej deti hoon, jab time mile check kar lena. Theek hai?",
+      "ts": "2026-03-27T10:24:45.314506"
+    },
+    {
+      "role": "user",
+      "text": "ठीक है।",
+      "ts": "2026-03-27T10:24:54.886432"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, maine aapko link bhej diya hai. Jab aapko time mile, tab book kar lijiyega. Thank you!",
+      "ts": "2026-03-27T10:24:55.839810"
+    },
+    {
+      "role": "user",
+      "text": "Okay, thank you.",
+      "ts": "2026-03-27T10:25:05.099098"
+    },
+    {
+      "role": "agent",
+      "text": "You're welcome! Have a great day!",
+      "ts": "2026-03-27T10:25:04.642843"
+    }
+  ]
+}

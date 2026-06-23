@@ -1,0 +1,89 @@
+{
+  "_source_call_id": 76,
+  "_recorded_disposition": "NOT_INTERESTED",
+  "_suggested": false,
+  "goal": "decline / opt out",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Astha ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 12 April 2026 ke liye tickets cart mein",
+      "ts": "2026-03-27T14:05:44.907302"
+    },
+    {
+      "role": "user",
+      "text": "Ach ja.",
+      "ts": "2026-03-27T14:05:54.063334"
+    },
+    {
+      "role": "agent",
+      "text": "Haan ji,",
+      "ts": "2026-03-27T14:05:53.404676"
+    },
+    {
+      "role": "user",
+      "text": "Kya?",
+      "ts": "2026-03-27T14:05:57.544126"
+    },
+    {
+      "role": "agent",
+      "text": "Sorry, kya aap mujhse baat kar rahe the?",
+      "ts": "2026-03-27T14:05:57.079624"
+    },
+    {
+      "role": "user",
+      "text": "हां। आपसे ही बात कर रही हूं। आप क्या बोल रहे हो?",
+      "ts": "2026-03-27T14:06:06.823403"
+    },
+    {
+      "role": "agent",
+      "text": "Main aapke cart ke baare mein pooch rahi thi, jisme 2 adult aur 2 child tickets the. Booking complete nahi hui thi, toh jaanna chahti thi ki koi problem thi kya?",
+      "ts": "2026-03-27T14:06:04.685566"
+    },
+    {
+      "role": "user",
+      "text": "कब डाला था, यह मैंने आई डोंट रिमेंबर।",
+      "ts": "2026-03-27T14:06:20.929800"
+    },
+    {
+      "role": "agent",
+      "text": "Yeh aapne kal raat ko add kiye the, 12 April ki booking ke liye. Kya aap plan cancel kar rahe hain?",
+      "ts": "2026-03-27T14:06:19.632972"
+    },
+    {
+      "role": "user",
+      "text": "A actually, I have guests coming in. Toh shayad cancel karna padega mujhe.",
+      "ts": "2026-03-27T14:06:32.952230"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, koi baat nahi.",
+      "ts": "2026-03-27T14:06:33.372675"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, koi baat nahi. Aapka bahut shukriya aur have a great day!",
+      "ts": "2026-03-27T14:06:34.829486"
+    },
+    {
+      "role": "user",
+      "text": "हेलो सुनो हेलो",
+      "ts": "2026-03-27T14:06:42.290934"
+    },
+    {
+      "role": "agent",
+      "text": "Haan",
+      "ts": "2026-03-27T14:06:41.979393"
+    },
+    {
+      "role": "user",
+      "text": "Hello.",
+      "ts": "2026-03-27T14:06:44.638470"
+    },
+    {
+      "role": "agent",
+      "text": "Sorry, kya aap kuch keh",
+      "ts": "2026-03-27T14:06:44.214327"
+    }
+  ]
+}

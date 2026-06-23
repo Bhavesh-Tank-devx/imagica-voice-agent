@@ -1,0 +1,89 @@
+{
+  "_source_call_id": 47,
+  "_recorded_disposition": "CALLBACK_SCHEDULED",
+  "_suggested": true,
+  "goal": "arrange a callback",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, LoadUser4 ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 15 May 2026 ke liye",
+      "ts": "2026-03-27T11:29:30.452750"
+    },
+    {
+      "role": "user",
+      "text": "हां।",
+      "ts": "2026-03-27T11:29:46.861532"
+    },
+    {
+      "role": "agent",
+      "text": "Kya hua sir? Koi problem aa rahi thi booking karte time?",
+      "ts": "2026-03-27T11:29:46.104219"
+    },
+    {
+      "role": "user",
+      "text": "कोई प्रॉब्लम नहीं।",
+      "ts": "2026-03-27T11:29:55.847216"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha, toh booking continue karein ab?",
+      "ts": "2026-03-27T11:29:54.821021"
+    },
+    {
+      "role": "user",
+      "text": "Nahi, aagya. na",
+      "ts": "2026-03-27T11:30:01.493695"
+    },
+    {
+      "role": "agent",
+      "text": "Na? Matlab abhi nahi karni booking?",
+      "ts": "2026-03-27T11:30:00.827905"
+    },
+    {
+      "role": "user",
+      "text": "H.",
+      "ts": "2026-03-27T11:30:08.087649"
+    },
+    {
+      "role": "user",
+      "text": "शाम को कहना।",
+      "ts": "2026-03-27T11:30:09.580906"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, main aapko shaam ko call karti hoon. Have a nice day!",
+      "ts": "2026-03-27T11:30:10.531997"
+    },
+    {
+      "role": "user",
+      "text": "pate kyo?",
+      "ts": "2026-03-27T11:30:33.729414"
+    },
+    {
+      "role": "user",
+      "text": "पति जय छोटू-मोनी को छे।",
+      "ts": "2026-03-27T11:30:36.610720"
+    },
+    {
+      "role": "agent",
+      "text": "Sorry, kya aap mujhse baat",
+      "ts": "2026-03-27T11:30:36.145824"
+    },
+    {
+      "role": "user",
+      "text": "چھپ رہے ہوں تم, ہاتھ سے بات کر.",
+      "ts": "2026-03-27T11:30:42.279969"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha,",
+      "ts": "2026-03-27T11:30:41.924639"
+    },
+    {
+      "role": "user",
+      "text": "ठीक सेकंड चुप रहे हो तो 15 17",
+      "ts": "2026-03-27T11:30:47.378804"
+    }
+  ]
+}

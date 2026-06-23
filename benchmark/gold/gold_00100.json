@@ -1,0 +1,274 @@
+{
+  "_source_call_id": 100,
+  "_recorded_disposition": "CONVERTED",
+  "_suggested": true,
+  "goal": "book an appointment",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello Gladston , I am Priya from Kaya Clinic. Is this right time to talk to you?",
+      "ts": "2026-06-03T11:21:59.838995"
+    },
+    {
+      "role": "user",
+      "text": "Yes.",
+      "ts": "2026-06-03T11:22:08.594846"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] You recently filled out a form on our website. Could you tell me about the concern you'd like to address — skin, hair, or something else?\n",
+      "ts": "2026-06-03T11:22:10.436083"
+    },
+    {
+      "role": "user",
+      "text": "मुझे skin related.",
+      "ts": "2026-06-03T11:22:22.660952"
+    },
+    {
+      "role": "agent",
+      "text": "...",
+      "ts": "2026-06-03T11:22:22.691238"
+    },
+    {
+      "role": "user",
+      "text": "No, I don't.",
+      "ts": "2026-06-03T11:22:25.355443"
+    },
+    {
+      "role": "agent",
+      "text": "[Empathetically] I apologize, I seem to have missed your previous response. Could you please tell me again about the concern you'd like to address? I want to make sure I understand correctly.",
+      "ts": "2026-06-03T11:22:27.877076"
+    },
+    {
+      "role": "user",
+      "text": "General, general, okay.",
+      "ts": "2026-06-03T11:22:40.940834"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Thank you for clarifying. So, you have a general skin concern. Our dermatologist will evaluate it and create a personalised plan for you.\n",
+      "ts": "2026-06-03T11:22:43.180635"
+    },
+    {
+      "role": "user",
+      "text": "Okay.",
+      "ts": "2026-06-03T11:22:56.455318"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] I have your first name as Gladston — could I get your last name?",
+      "ts": "2026-06-03T11:22:56.677951"
+    },
+    {
+      "role": "user",
+      "text": "Sikuerah.",
+      "ts": "2026-06-03T11:23:05.583450"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you. And which city are you based in?",
+      "ts": "2026-06-03T11:23:06.175561"
+    },
+    {
+      "role": "user",
+      "text": "Um, I am speaking from Surat.",
+      "ts": "2026-06-03T11:23:14.273219"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Just to confirm — you're looking for a branch in Surat, right?\n",
+      "ts": "2026-06-03T11:23:14.738598"
+    },
+    {
+      "role": "user",
+      "text": "हाँ, जी।",
+      "ts": "2026-06-03T11:23:22.099145"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] In Surat, we have two branches: Vesu and Ghod Dod Road. Which one would be more convenient for you?\n",
+      "ts": "2026-06-03T11:23:23.237761"
+    },
+    {
+      "role": "user",
+      "text": "Mm, Vesu.",
+      "ts": "2026-06-03T11:23:33.452209"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] I'll note your appointment at Vesu, Surat. What date and time would be best for your visit?\n",
+      "ts": "2026-06-03T11:23:34.367262"
+    },
+    {
+      "role": "user",
+      "text": "Hmm.",
+      "ts": "2026-06-03T11:23:44.845238"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] We are open from 10 AM to 8 PM, Monday to Saturday. What date and time works for you?\n",
+      "ts": "2026-06-03T11:23:46.462117"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] And which date would that be?\n",
+      "ts": "2026-06-03T11:23:59.310718"
+    },
+    {
+      "role": "user",
+      "text": "हम्म, 4 PM।",
+      "ts": "2026-06-03T11:23:59.846437"
+    },
+    {
+      "role": "user",
+      "text": "हाँ जी।",
+      "ts": "2026-06-03T11:24:08.820200"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Could you please tell me the specific date for your 4 PM appointment?",
+      "ts": "2026-06-03T11:24:09.237364"
+    },
+    {
+      "role": "user",
+      "text": "4th June को।",
+      "ts": "2026-06-03T11:24:18.926204"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you. So that's June 4th at 4 PM at our Vesu branch in Surat.\n",
+      "ts": "2026-06-03T11:24:19.673980"
+    },
+    {
+      "role": "user",
+      "text": "Yes.",
+      "ts": "2026-06-03T11:24:30.695117"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] A basic consultation is completely free. If a detailed medical evaluation is needed, the fee is Rs. 750.\n",
+      "ts": "2026-06-03T11:24:30.844555"
+    },
+    {
+      "role": "user",
+      "text": "Okay.",
+      "ts": "2026-06-03T11:24:35.064804"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] A basic consultation is completely free. If a detailed medical evaluation is needed, the fee is Rs. 750.\n",
+      "ts": "2026-06-03T11:24:36.142650"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] What is your email address, please?\n",
+      "ts": "2026-06-03T11:24:46.839485"
+    },
+    {
+      "role": "user",
+      "text": "अच्छा।",
+      "ts": "2026-06-03T11:24:47.514725"
+    },
+    {
+      "role": "user",
+      "text": "Uh, gladstonsquare-98@gmail.com.",
+      "ts": "2026-06-03T11:25:00.796455"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Could you spell that for me, using words for tricky letters like T for Tiger or E for Egg?\n",
+      "ts": "2026-06-03T11:25:02.315540"
+    },
+    {
+      "role": "user",
+      "text": "Yes. Um, G-L-A-D-S-T-O-N, Gladston. Sequira, S-E-Q-U-I-R-A, 98@gmail.com.",
+      "ts": "2026-06-03T11:25:27.584079"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you. So that's G-L-A-D-S-T-O-N-S-E-Q-U-I-R-A-9-8, at gmail dot com — sahi hai?\n",
+      "ts": "2026-06-03T11:25:29.671565"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] And your date of birth?\n",
+      "ts": "2026-06-03T11:25:45.752333"
+    },
+    {
+      "role": "user",
+      "text": "हाँ जी, सही है।",
+      "ts": "2026-06-03T11:25:46.535888"
+    },
+    {
+      "role": "user",
+      "text": "Kyun? Isse kya hoga?",
+      "ts": "2026-06-03T11:25:53.124980"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] It is for accurate patient identification in our medical records.\n",
+      "ts": "2026-06-03T11:25:53.891770"
+    },
+    {
+      "role": "user",
+      "text": "मैं कितने बात कर",
+      "ts": "2026-06-03T11:26:02.432164"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Could you please share your date of birth?\n",
+      "ts": "2026-06-03T11:26:02.442167"
+    },
+    {
+      "role": "user",
+      "text": "Aap Hindi mein baat kar sakte hain",
+      "ts": "2026-06-03T11:26:09.435653"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Haan bilkul, main aapse Hindi mein baat kar sakti hoon. Aapki date of birth kya hai?\n",
+      "ts": "2026-06-03T11:26:10.088958"
+    },
+    {
+      "role": "user",
+      "text": "Theek hai. 28th June,2000.",
+      "ts": "2026-06-03T11:26:20.125409"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Dhanyavaad. Aur aapka 6-digit pin code kya hai?\n",
+      "ts": "2026-06-03T11:26:20.678492"
+    },
+    {
+      "role": "user",
+      "text": "Pin code नहीं पता मुझे, में ही मेरा चलेगा।",
+      "ts": "2026-06-03T11:26:31.919246"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Koi baat nahi. Aapka concern general skin ka hai, right?\n",
+      "ts": "2026-06-03T11:26:32.498060"
+    },
+    {
+      "role": "user",
+      "text": "Haan ji.",
+      "ts": "2026-06-03T11:26:39.966022"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Theek hai. Aapka naam Gladston Sequeira hai, appointment Vesu branch, Surat mein 4th June ko shaam 4 baje hai, aur aapka concern general skin ka hai. Kya sab details sahi hain?\n",
+      "ts": "2026-06-03T11:26:42.866486"
+    },
+    {
+      "role": "user",
+      "text": "जी।",
+      "ts": "2026-06-03T11:26:56.786783"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Aapki appointment book ho gayi hai aur aapko jald hi confirmation mil jayega. Have a wonderful day, bye!\n",
+      "ts": "2026-06-03T11:27:00.069365"
+    }
+  ]
+}

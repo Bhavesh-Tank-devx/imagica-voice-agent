@@ -1,0 +1,34 @@
+{
+  "_source_call_id": 78,
+  "_recorded_disposition": "TRANSFERRED_TO_HUMAN",
+  "_suggested": true,
+  "goal": "reach a human agent",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Bhavya ji! Main",
+      "ts": "2026-03-27T14:41:55.910657"
+    },
+    {
+      "role": "user",
+      "text": "Hello.",
+      "ts": "2026-03-27T14:42:01.041041"
+    },
+    {
+      "role": "agent",
+      "text": "cart mein add kiye the — 2 Adult, 2 Child ke liye. Booking complete nahi hui thi, toh socha ek baar remind kar doon. Koi problem thi kya?",
+      "ts": "2026-03-27T14:41:58.958828"
+    },
+    {
+      "role": "user",
+      "text": "Aapki awaz nahin a rahi, can you please connect, human agent with me?",
+      "ts": "2026-03-27T14:42:15.060254"
+    },
+    {
+      "role": "agent",
+      "text": "Transferring you to our customer care team now. Please hold.",
+      "ts": "2026-03-27T14:42:17.205917"
+    }
+  ]
+}

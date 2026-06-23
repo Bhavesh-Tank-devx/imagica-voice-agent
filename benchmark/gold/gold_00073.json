@@ -1,0 +1,59 @@
+{
+  "_source_call_id": 73,
+  "_recorded_disposition": "NOT_INTERESTED",
+  "_suggested": false,
+  "goal": "decline / opt out",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Bhavesh ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 20 April 2026 ke liye tickets cart mein add kiye the — 4 Adult, 2 Child ke liye. Booking complete nahi hui thi, toh socha aapko ek baar remind kar doon. Koi problem thi kya?",
+      "ts": "2026-03-27T12:35:45.894373"
+    },
+    {
+      "role": "user",
+      "text": "koi problem nahin hai per plan change ho gaya hai.",
+      "ts": "2026-03-27T12:36:10.784884"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha, plans change ho gaye? Koi baat nahi hai. Kya main jaan sakti hoon ki kya changes aaye hain?",
+      "ts": "2026-03-27T12:36:09.459487"
+    },
+    {
+      "role": "user",
+      "text": "Hello.",
+      "ts": "2026-03-27T12:36:32.673617"
+    },
+    {
+      "role": "agent",
+      "text": "Sorry, kya aap mujhse baat kar rahe the?",
+      "ts": "2026-03-27T12:36:32.172076"
+    },
+    {
+      "role": "user",
+      "text": "han",
+      "ts": "2026-03-27T12:36:41.136639"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai.",
+      "ts": "2026-03-27T12:36:40.293908"
+    },
+    {
+      "role": "user",
+      "text": "तो उनसे ही बात कर रहा था।",
+      "ts": "2026-03-27T12:36:45.020028"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha. Toh, kya aap abhi booking confirm karna chahte hain? Ya baad mein plan karenge?",
+      "ts": "2026-03-27T12:36:43.866732"
+    },
+    {
+      "role": "user",
+      "text": "नहीं नहीं कैंसिल प्लान कैंसिल।",
+      "ts": "2026-03-27T12:36:57.764518"
+    }
+  ]
+}

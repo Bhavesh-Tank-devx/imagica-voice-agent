@@ -1,0 +1,229 @@
+{
+  "_source_call_id": 96,
+  "_recorded_disposition": "CALL_COMPLETED_NO_OUTCOME",
+  "_suggested": false,
+  "goal": "(unclear — no decisive outcome)",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello!!",
+      "ts": "2026-06-02T20:27:29.383920"
+    },
+    {
+      "role": "user",
+      "text": "Hello?",
+      "ts": "2026-06-02T20:27:36.132597"
+    },
+    {
+      "role": "agent",
+      "text": "Hello, am I speaking with Bhavesh? Hi, this is Priya from Kaya Clinic — you recently filled out a form on our website. Is this a good time?",
+      "ts": "2026-06-02T20:27:38.775587"
+    },
+    {
+      "role": "user",
+      "text": "Yes.",
+      "ts": "2026-06-02T20:27:42.632225"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Hi Bhavesh, this is Priya from Kaya Clinic. You recently filled out a form on our website. Is this a good time for you?",
+      "ts": "2026-06-02T20:27:44.673617"
+    },
+    {
+      "role": "user",
+      "text": "Yes.",
+      "ts": "2026-06-02T20:27:54.023105"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Great! Could you tell me about the concern you'd like to address – skin, hair, or something else?",
+      "ts": "2026-06-02T20:27:55.230825"
+    },
+    {
+      "role": "user",
+      "text": "It's about my skin. I have some pimplesand acne scars on my face.",
+      "ts": "2026-06-02T20:28:08.968998"
+    },
+    {
+      "role": "agent",
+      "text": "[Empathetically] I understand you're concerned about pimples and acne scars. Kaya Clinic offers various treatments like Chemical Peels, Facials, and Acne Scar Treatments that can help. Our dermatologist will evaluate your skin and create a personalized plan for you.\n",
+      "ts": "2026-06-02T20:28:13.210477"
+    },
+    {
+      "role": "user",
+      "text": "Oh, great.",
+      "ts": "2026-06-02T20:28:30.978854"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] I have your first name as Bhavesh. Could I get your last name, please?",
+      "ts": "2026-06-02T20:28:31.710637"
+    },
+    {
+      "role": "agent",
+      "text": "Can you hear me?",
+      "ts": "2026-06-02T20:28:44.076816"
+    },
+    {
+      "role": "user",
+      "text": "...",
+      "ts": "2026-06-02T20:28:44.925028"
+    },
+    {
+      "role": "user",
+      "text": "Yes. My last name is Thomas.",
+      "ts": "2026-06-02T20:28:55.426025"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you, Bhavesh Thomas. Which city are you based in?",
+      "ts": "2026-06-02T20:28:56.053299"
+    },
+    {
+      "role": "user",
+      "text": "I am from Surat.",
+      "ts": "2026-06-02T20:29:05.421347"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Just to confirm—you're looking for a branch in Surat, right?",
+      "ts": "2026-06-02T20:29:06.131665"
+    },
+    {
+      "role": "user",
+      "text": "Yes.",
+      "ts": "2026-06-02T20:29:11.962681"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Great! In Surat, we have two branches: Vesu and Ghod Dod Road. Which one would be more convenient for you?",
+      "ts": "2026-06-02T20:29:12.793926"
+    },
+    {
+      "role": "user",
+      "text": "Vesu.",
+      "ts": "2026-06-02T20:29:24.953528"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] I'll note your appointment at our Vesu branch in Surat. What date and time would you prefer for your consultation? Our clinic hours are from 10 AM to 8 PM, Monday to Saturday.",
+      "ts": "2026-06-02T20:29:26.431468"
+    },
+    {
+      "role": "user",
+      "text": "It's 7:00 PM.",
+      "ts": "2026-06-02T20:29:44.545108"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] We book in 30-minute slots. I have 7:00 PM or 7:30 PM. Which works better for you?",
+      "ts": "2026-06-02T20:29:46.059630"
+    },
+    {
+      "role": "user",
+      "text": "7:00 PM.",
+      "ts": "2026-06-02T20:29:58.276971"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you. A basic consultation is completely free. If a detailed medical evaluation is needed, the fee is Rs. 750.",
+      "ts": "2026-06-02T20:30:00.529407"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] What is your email address, Bhavesh?",
+      "ts": "2026-06-02T20:30:13.452019"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] What is your email address, please?",
+      "ts": "2026-06-02T20:30:16.387008"
+    },
+    {
+      "role": "user",
+      "text": "Okay. नूर...",
+      "ts": "2026-06-02T20:30:16.766630"
+    },
+    {
+      "role": "user",
+      "text": "It is bhaave369r5@gmail.com.",
+      "ts": "2026-06-02T20:30:31.927144"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Could you please spell out the part before '@gmail.com' using words, like B for Boy, H for Hotel, etc.?",
+      "ts": "2026-06-02T20:30:33.775371"
+    },
+    {
+      "role": "user",
+      "text": "bhavesh369rta@gmail.com",
+      "ts": "2026-06-02T20:30:51.177165"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you. So, that's B as in Boy, H as in Hotel, A as in Apple, V as in Victor, E as in Egg, S as in Sugar, H as in Hotel, three, six, nine, R as in Raja, T as in Tiger, A as in Apple, at gmail dot com. Sahi hai?",
+      "ts": "2026-06-02T20:30:55.726906"
+    },
+    {
+      "role": "user",
+      "text": "No, you forget N and K.After T, A.",
+      "ts": "2026-06-02T20:31:20.487803"
+    },
+    {
+      "role": "agent",
+      "text": "...",
+      "ts": "2026-06-02T20:31:20.887445"
+    },
+    {
+      "role": "user",
+      "text": "It is bhavesh369r.com",
+      "ts": "2026-06-02T20:31:27.971626"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] My apologies. Let me confirm that for you. Is it B as in Boy, H as in Hotel, A as in Apple, V as in Victor, E as in Egg, S as in Sugar, H as in Hotel, three, six, nine, R as in Raja, dot com? Sahi hai?",
+      "ts": "2026-06-02T20:31:32.892736"
+    },
+    {
+      "role": "user",
+      "text": "No, no, after, after three, six,nine, you have to put R-E-A-N-K.",
+      "ts": "2026-06-02T20:31:54.203097"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you for clarifying. So, it's B as in Boy, H as in Hotel, A as in Apple, V as in Victor, E as in Egg, S as in Sugar, H as in Hotel, three, six, nine, R as in Raja, E as in Egg, A as in Apple, N as in Necklace, K as in Kite, at gmail dot com. Is that correct?",
+      "ts": "2026-06-02T20:31:59.876423"
+    },
+    {
+      "role": "user",
+      "text": "... spelling, spelling character by character.",
+      "ts": "2026-06-02T20:32:09.198151"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you for your patience. Let's try this again. Is your email address B as in Boy, H as in Hotel, A as in Apple, V as in Victor, E as in Egg, S as in Sugar, H as in Hotel, three, six, nine, R as in Raja, E as in Egg, A as in Apple, N as in Necklace, K as in Kite, at gmail dot com. Sahi hai?",
+      "ts": "2026-06-02T20:32:16.073937"
+    },
+    {
+      "role": "user",
+      "text": "Yes. Uh, that is right. Just keep it",
+      "ts": "2026-06-02T20:32:20.926686"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Okay, so the email is B as in Boy, H as in Hotel, A as in Apple, V as in Victor, E as in Egg, S as in Sugar, H as in Hotel, three, six, nine, R as in Raja, E as in Egg, A as in Apple, N as in Necklace, K as in Kite, at gmail dot com. Sahi hai?",
+      "ts": "2026-06-02T20:32:26.383372"
+    },
+    {
+      "role": "user",
+      "text": "Yes, yes, yes. Keep it.<|hi|>Yes.",
+      "ts": "2026-06-02T20:32:35.043280"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Theek hai. Toh, aapka email address hai B as in Boy, H as in Hotel, A as in Apple, V as in Victor, E as in Egg, S as in Sugar, H as in Hotel, three, six, nine, R as in Raja, E as in Egg, A as in Apple, N as in Necklace, K as in Kite, at gmail dot com. Sahi hai?",
+      "ts": "2026-06-02T20:32:40.660813"
+    }
+  ]
+}

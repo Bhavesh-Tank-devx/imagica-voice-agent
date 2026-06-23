@@ -1,0 +1,224 @@
+{
+  "_source_call_id": 94,
+  "_recorded_disposition": "CONVERTED",
+  "_suggested": true,
+  "goal": "book an appointment",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello!",
+      "ts": "2026-06-02T14:21:36.897034"
+    },
+    {
+      "role": "user",
+      "text": "Hello.",
+      "ts": "2026-06-02T14:21:43.479219"
+    },
+    {
+      "role": "agent",
+      "text": "Hello, am I speaking with Bhavesh? Hi, this is Priya from Kaya Clinic — you recently filled out a form on our website. Is this a good time?",
+      "ts": "2026-06-02T14:21:44.417589"
+    },
+    {
+      "role": "user",
+      "text": "Yes.",
+      "ts": "2026-06-02T14:21:56.947894"
+    },
+    {
+      "role": "agent",
+      "text": "Could you tell me about the concern you'd like to address — skin, hair, or something else?",
+      "ts": "2026-06-02T14:21:56.983640"
+    },
+    {
+      "role": "user",
+      "text": "It is about my skin. I have some pimple and acne scars on my face.",
+      "ts": "2026-06-02T14:22:10.624924"
+    },
+    {
+      "role": "agent",
+      "text": "We offer several treatments for acne and pimples, such as Chemical Peels, Facials, Acne Scar Treatment, and Microneedling. Our dermatologist will evaluate your skin and create a personalized plan for you.\n",
+      "ts": "2026-06-02T14:22:11.836284"
+    },
+    {
+      "role": "user",
+      "text": "Oh, my.",
+      "ts": "2026-06-02T14:22:28.589048"
+    },
+    {
+      "role": "agent",
+      "text": "I have your first name as Bhavesh — could I get your last name?",
+      "ts": "2026-06-02T14:22:28.616195"
+    },
+    {
+      "role": "user",
+      "text": "My last name is Tank.",
+      "ts": "2026-06-02T14:22:38.259502"
+    },
+    {
+      "role": "agent",
+      "text": "Which city are you based in?",
+      "ts": "2026-06-02T14:22:38.280628"
+    },
+    {
+      "role": "user",
+      "text": "I am from Surat.",
+      "ts": "2026-06-02T14:22:44.338493"
+    },
+    {
+      "role": "agent",
+      "text": "Just to confirm — you're looking for a branch in Surat, right?",
+      "ts": "2026-06-02T14:22:44.379614"
+    },
+    {
+      "role": "user",
+      "text": "Yes.",
+      "ts": "2026-06-02T14:22:51.871846"
+    },
+    {
+      "role": "agent",
+      "text": "In Surat, we have two branches: Vesu and Ghod Dod Road. Which one would you prefer?",
+      "ts": "2026-06-02T14:22:52.397721"
+    },
+    {
+      "role": "user",
+      "text": "Vesu one.",
+      "ts": "2026-06-02T14:23:03.833938"
+    },
+    {
+      "role": "agent",
+      "text": "I'll note your appointment at Vesu, Surat. What date and time would you prefer for your appointment?",
+      "ts": "2026-06-02T14:23:04.394608"
+    },
+    {
+      "role": "user",
+      "text": "Konsa time pe available ho aap?<|hi|>",
+      "ts": "2026-06-02T14:23:15.828635"
+    },
+    {
+      "role": "agent",
+      "text": "We book in 30-minute slots between 10 AM and 8 PM, Monday through Saturday. What time works best for you?",
+      "ts": "2026-06-02T14:23:16.458053"
+    },
+    {
+      "role": "user",
+      "text": "Uh,",
+      "ts": "2026-06-02T14:23:29.071798"
+    },
+    {
+      "role": "agent",
+      "text": "What time would be convenient for your appointment?",
+      "ts": "2026-06-02T14:23:29.117746"
+    },
+    {
+      "role": "user",
+      "text": "5:00.",
+      "ts": "2026-06-02T14:23:38.058997"
+    },
+    {
+      "role": "agent",
+      "text": "And which date would that be?",
+      "ts": "2026-06-02T14:23:38.083866"
+    },
+    {
+      "role": "user",
+      "text": "Is Saniwar ko.",
+      "ts": "2026-06-02T14:23:44.874049"
+    },
+    {
+      "role": "agent",
+      "text": "शनिवार को किस तारीख पर आप अपॉइंटमेंट लेना चाहेंगे?",
+      "ts": "2026-06-02T14:23:46.296352"
+    },
+    {
+      "role": "user",
+      "text": "6 जून।",
+      "ts": "2026-06-02T14:23:59.022683"
+    },
+    {
+      "role": "agent",
+      "text": "तो, मैं आपका अपॉइंटमेंट 6 जून को शाम 5:00 बजे वेसू, सूरत में बुक कर रही हूँ। क्या यह सही है?",
+      "ts": "2026-06-02T14:23:59.117720"
+    },
+    {
+      "role": "user",
+      "text": "हाँ, सही है।",
+      "ts": "2026-06-02T14:24:10.466554"
+    },
+    {
+      "role": "agent",
+      "text": "एक बेसिक कंसल्टेशन पूरी तरह से मुफ्त है। यदि विस्तृत मेडिकल मूल्यांकन की आवश्यकता होती है, तो शुल्क सात सौ पचास रुपये होगा।",
+      "ts": "2026-06-02T14:24:11.217715"
+    },
+    {
+      "role": "user",
+      "text": "Okay, no problem.",
+      "ts": "2026-06-02T14:24:27.092671"
+    },
+    {
+      "role": "agent",
+      "text": "आपका ईमेल एड्रेस क्या है?",
+      "ts": "2026-06-02T14:24:27.110590"
+    },
+    {
+      "role": "user",
+      "text": "भावेश369rtaak@gmail",
+      "ts": "2026-06-02T14:24:41.835175"
+    },
+    {
+      "role": "agent",
+      "text": "B-H-A-V-E-S-H, तीन-छह-नौ, R-T-A-A-K, at gmail dot com — सही है?",
+      "ts": "2026-06-02T14:24:41.885223"
+    },
+    {
+      "role": "user",
+      "text": "हाँ, सही है।",
+      "ts": "2026-06-02T14:24:53.045263"
+    },
+    {
+      "role": "agent",
+      "text": "और आपकी जन्मतिथि क्या है?",
+      "ts": "2026-06-02T14:24:53.370102"
+    },
+    {
+      "role": "user",
+      "text": "16 फरवरी 2004.",
+      "ts": "2026-06-02T14:25:03.217677"
+    },
+    {
+      "role": "agent",
+      "text": "आपका छह अंकों का पिन कोड क्या है?",
+      "ts": "2026-06-02T14:25:03.254307"
+    },
+    {
+      "role": "user",
+      "text": "394107.",
+      "ts": "2026-06-02T14:25:13.892054"
+    },
+    {
+      "role": "agent",
+      "text": "क्या आपको किसी ने काया क्लिनिक के बारे में बताया, या आपने हमें खुद ढूंढा?",
+      "ts": "2026-06-02T14:25:14.358033"
+    },
+    {
+      "role": "user",
+      "text": "नहीं। नहीं, मैं खुद ही आया हूँ।",
+      "ts": "2026-06-02T14:25:23.017392"
+    },
+    {
+      "role": "agent",
+      "text": "तो, मैं पुष्टि करना चाहूँगी कि आपका अपॉइंटमेंट भावेश टैंक के नाम से वेसू, सूरत में 6 जून को शाम 5:00 बजे मुँहासे और फुंसी के निशान के लिए बुक किया गया है। क्या सब कुछ सही लग रहा है?",
+      "ts": "2026-06-02T14:25:23.993399"
+    },
+    {
+      "role": "user",
+      "text": "हाँ, सब कुछ सही है।",
+      "ts": "2026-06-02T14:25:41.227556"
+    },
+    {
+      "role": "agent",
+      "text": "आपका अपॉइंटमेंट बुक हो गया है और आपको जल्द ही एक कन्फर्मेशन मिल जाएगा। आपका दिन शुभ हो, अलविदा!",
+      "ts": "2026-06-02T14:25:43.618724"
+    }
+  ]
+}

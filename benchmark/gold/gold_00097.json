@@ -1,0 +1,79 @@
+{
+  "_source_call_id": 97,
+  "_recorded_disposition": "CALL_COMPLETED_NO_OUTCOME",
+  "_suggested": false,
+  "goal": "(unclear — no decisive outcome)",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "user",
+      "text": "...",
+      "ts": "2026-06-02T21:23:05.730161"
+    },
+    {
+      "role": "agent",
+      "text": "...",
+      "ts": "2026-06-02T21:23:06.199874"
+    },
+    {
+      "role": "user",
+      "text": "Hello?",
+      "ts": "2026-06-02T21:23:08.549618"
+    },
+    {
+      "role": "agent",
+      "text": "Hello, am I speaking with Bhavesh? Hi, this is Priya from Kaya Clinic — you recently filled out a form on our website. Is this a good time?",
+      "ts": "2026-06-02T21:23:10.214919"
+    },
+    {
+      "role": "user",
+      "text": "Yes.",
+      "ts": "2026-06-02T21:23:15.097907"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Great! This is Priya from Kaya Clinic, and you recently filled out a form on our website. Is this a good time for a quick chat?",
+      "ts": "2026-06-02T21:23:16.661385"
+    },
+    {
+      "role": "user",
+      "text": "Ah,",
+      "ts": "2026-06-02T21:23:26.719296"
+    },
+    {
+      "role": "agent",
+      "text": "[Empathetically] Could you tell me about the concern you'd like to address — skin, hair, or something else?",
+      "ts": "2026-06-02T21:23:27.610054"
+    },
+    {
+      "role": "user",
+      "text": "Haa, mujhe face pe pimples aur acnehai.",
+      "ts": "2026-06-02T21:23:39.546700"
+    },
+    {
+      "role": "agent",
+      "text": "\n[Warmly] Achha, aapko face par pimples aur acne ki concern hai. Kaya Clinic mein hum Chemical Peel aur Facials jaise treatments provide karte hain, aur hamare dermatologist aapki skin ko evaluate karke ek personalised plan banayenge.",
+      "ts": "2026-06-02T21:23:42.646506"
+    },
+    {
+      "role": "user",
+      "text": "अच्छा।",
+      "ts": "2026-06-02T21:23:59.236888"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] I have your first name as Bhavesh — could I get your last name, please?",
+      "ts": "2026-06-02T21:23:59.319904"
+    },
+    {
+      "role": "user",
+      "text": "My last name is Bhaves.",
+      "ts": "2026-06-02T21:24:10.003232"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Thank you, Bhavesh. Ab aapki city kya hai?",
+      "ts": "2026-06-02T21:24:10.451375"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "_source_call_id": 67,
+  "_recorded_disposition": "INTERESTED_LINK_SENT",
+  "_suggested": true,
+  "goal": "get a booking link / proceed",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Vimal ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 1 May 2026",
+      "ts": "2026-03-27T12:24:10.187342"
+    },
+    {
+      "role": "user",
+      "text": "Huh.",
+      "ts": "2026-03-27T12:24:19.985287"
+    },
+    {
+      "role": "user",
+      "text": "બোলુ પરેન એસ થોઈ ડોલર. હેલો.",
+      "ts": "2026-03-27T12:24:23.833487"
+    },
+    {
+      "role": "agent",
+      "text": "Sorry, kya aap mujhse baat kar rahe the?",
+      "ts": "2026-03-27T12:24:23.376994"
+    },
+    {
+      "role": "user",
+      "text": "आपकी आवाज कट रही है।",
+      "ts": "2026-03-27T12:24:32.889693"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha, theek hai.",
+      "ts": "2026-03-27T12:24:31.892676"
+    },
+    {
+      "role": "user",
+      "text": "Hello.",
+      "ts": "2026-03-27T12:24:35.262252"
+    },
+    {
+      "role": "agent",
+      "text": "Sorry,",
+      "ts": "2026-03-27T12:24:34.683593"
+    },
+    {
+      "role": "user",
+      "text": "ling ke picture",
+      "ts": "2026-03-27T12:24:38.875738"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, main aapko link",
+      "ts": "2026-03-27T12:24:39.376387"
+    },
+    {
+      "role": "user",
+      "text": "Hello.",
+      "ts": "2026-03-27T12:24:43.695709"
+    },
+    {
+      "role": "user",
+      "text": "Hello.",
+      "ts": "2026-03-27T12:24:47.162973"
+    },
+    {
+      "role": "agent",
+      "text": "Hello?",
+      "ts": "2026-03-27T12:24:46.603681"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "_source_call_id": 63,
+  "_recorded_disposition": "NOT_INTERESTED",
+  "_suggested": false,
+  "goal": "decline / opt out",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Bhavesh ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 20 April 2026 ke liye tickets cart mein add kiye the — 4 Adult, 2 Child ke liye. Booking",
+      "ts": "2026-03-27T12:23:47.680098"
+    },
+    {
+      "role": "user",
+      "text": "lock in a x",
+      "ts": "2026-03-27T12:24:00.813981"
+    },
+    {
+      "role": "user",
+      "text": "Not interested any more.",
+      "ts": "2026-03-27T12:24:03.834338"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, koi baat nahi.",
+      "ts": "2026-03-27T12:24:04.337769"
+    }
+  ]
+}

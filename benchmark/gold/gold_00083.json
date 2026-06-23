@@ -1,0 +1,45 @@
+{
+  "_source_call_id": 83,
+  "_recorded_disposition": "TECHNICAL_FAILURE",
+  "_suggested": false,
+  "goal": "(call dropped)",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, kya main Bhavesh se baat kar sakti hoon? Main Priya bol rahi hoon, Imagicaa Theme Park se."
+    },
+    {
+      "role": "user",
+      "text": "हाँ, बोलिए।"
+    },
+    {
+      "role": "agent",
+      "text": "Bhavesh, aapne Imagicaa mein do adults aur do bacchon ke liye April barah tarikh, do hazaar chabbis ki booking shuru ki thi, jiska total satavan sau chhiyanve rupay hai, lekin woh poori nahi ho paayi thi. Kya aap apni booking complete karna chahenge?"
+    },
+    {
+      "role": "user",
+      "text": "अ, नहीं, booking complete करने का हम-- का कोई plan नहीं है।"
+    },
+    {
+      "role": "agent",
+      "text": "[sad] Achha, theek hai. Kya koi specific concern hai — price, dates, ya kuch aur jiski wajah se aap booking complete nahi karna chahte?"
+    },
+    {
+      "role": "user",
+      "text": "नहीं, mood नहीं है।ठोंकने की आवाज़"
+    },
+    {
+      "role": "agent",
+      "text": "[sad] Achha, theek hai. Main samajh gayi."
+    },
+    {
+      "role": "user",
+      "text": "..."
+    },
+    {
+      "role": "agent",
+      "text": "Kya aap mujhe sun pa rahe hain..."
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "_source_call_id": 82,
+  "_recorded_disposition": "TECHNICAL_FAILURE",
+  "_suggested": false,
+  "goal": "(call dropped)",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, kya main Bhavesh se baat kar sakti hoon? Main Priya bol rahi hoon, Imagicaa Theme Park se."
+    },
+    {
+      "role": "user",
+      "text": "हाँ, बोलिए।"
+    },
+    {
+      "role": "agent",
+      "text": "Bhavesh, aapne Imagicaa mein do adult aur do bacchon ke liye ek booking shuru ki thi, total paanch hazaar saat sau chhiyaanve rupaye ki, baarah April do hazaar pachchees ke liye. Kya aap [happy] apni booking complete karna chahenge?"
+    },
+    {
+      "role": "user",
+      "text": "हाँ, हाँ, कम से कर दीजिए।ठीक है।"
+    },
+    {
+      "role": "agent",
+      "text": "The booking link has been sent to your phone number. You can complete your booking by clicking on the link."
+    },
+    {
+      "role": "agent",
+      "text": "Maine aapko ek booking link bheja hai. Kya aur kuch help chahiye?"
+    },
+    {
+      "role": "user",
+      "text": "नहीं, और कुछ help नहीं चाहिए।"
+    },
+    {
+      "role": "agent",
+      "text": "Aapka din shubh ho, bye!"
+    },
+    {
+      "role": "agent",
+      "text": "Mujhe abhi kuch technical issue aa rahi hai. Main aapki request note kar leti hoon. Aapka din shubh ho, bye!"
+    },
+    {
+      "role": "user",
+      "text": "हाँ, बिल्कुल सही है।Call"
+    },
+    {
+      "role": "agent",
+      "text": "..."
+    }
+  ]
+}

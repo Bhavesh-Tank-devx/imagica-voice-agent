@@ -1,0 +1,109 @@
+{
+  "_source_call_id": 81,
+  "_recorded_disposition": "NOT_INTERESTED",
+  "_suggested": false,
+  "goal": "decline / opt out",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Roshni ji! Main Priya bol rahi hoon, Imagicaa se.",
+      "ts": "2026-03-30T11:08:42.015887"
+    },
+    {
+      "role": "user",
+      "text": "Sandeep, tum hi to aate hain.",
+      "ts": "2026-03-30T11:09:00.826664"
+    },
+    {
+      "role": "user",
+      "text": "Hello.",
+      "ts": "2026-03-30T11:09:09.406772"
+    },
+    {
+      "role": "agent",
+      "text": "Hello? Roshni ji, aapko meri awaaz aa rahi hai?",
+      "ts": "2026-03-30T11:09:08.757275"
+    },
+    {
+      "role": "user",
+      "text": "AA 38",
+      "ts": "2026-03-30T11:09:17.460541"
+    },
+    {
+      "role": "agent",
+      "text": "Haan, aapne 12 April ke liye tickets add kiye the, booking complete nahi hui — koi problem aayi thi?",
+      "ts": "2026-03-30T11:09:15.953788"
+    },
+    {
+      "role": "user",
+      "text": "हां, बहुत प्रॉब्लम आई थी।",
+      "ts": "2026-03-30T11:09:27.701082"
+    },
+    {
+      "role": "agent",
+      "text": "Kya problem aa rahi thi? Date ka issue tha? Ya kuch aur?",
+      "ts": "2026-03-30T11:09:26.949087"
+    },
+    {
+      "role": "user",
+      "text": "याप में रेटिंग ही इतनी सारी रखी है तो, हम टिकट कैसे ले? हम तो बहुत सारे ग्रुप में आने वाले हैं और टिकट का कॉस्ट बहुत ज्यादा हो रहा है।",
+      "ts": "2026-03-30T11:09:44.641674"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha, price ka issue hai, samajh gayi. Main aapko ispar ek chhota discount de sakti hoon, kya woh help karega?",
+      "ts": "2026-03-30T11:09:43.093664"
+    },
+    {
+      "role": "user",
+      "text": "Chhota discount mat lab kitna?",
+      "ts": "2026-03-30T11:09:55.945263"
+    },
+    {
+      "role": "agent",
+      "text": "Main aapko 5% discount de sakti hoon. Kya main apply kar doon?",
+      "ts": "2026-03-30T11:09:55.006667"
+    },
+    {
+      "role": "user",
+      "text": "उतने में तो क्या यह कम होगा, थोड़ा और ज्यादा करो, हम ग्रुप में बहुत सारे 20% है।",
+      "ts": "2026-03-30T11:10:08.232276"
+    },
+    {
+      "role": "user",
+      "text": "और हिसाब से तो ज्यादा डिस्काउंट होना चाहिए।",
+      "ts": "2026-03-30T11:10:13.806964"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha theek hai, main aapko 10% discount de sakti hoon, usse aapki booking ho jaegi?",
+      "ts": "2026-03-30T11:10:12.527555"
+    },
+    {
+      "role": "user",
+      "text": "10% of dete hi hain already thoda aur jyada.",
+      "ts": "2026-03-30T11:10:27.397835"
+    },
+    {
+      "role": "agent",
+      "text": "Maaf kijiye, main 10% se zyada discount nahi de sakti — yeh hamari policy hai. Kya aap ismein book karna chahenge?",
+      "ts": "2026-03-30T11:10:25.648961"
+    },
+    {
+      "role": "user",
+      "text": "नहीं, तो रहने दो।",
+      "ts": "2026-03-30T11:10:37.795065"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai Roshni",
+      "ts": "2026-03-30T11:10:36.769711"
+    },
+    {
+      "role": "user",
+      "text": "Kyo bhola tu ne hmesha?",
+      "ts": "2026-03-30T11:10:52.386359"
+    }
+  ]
+}

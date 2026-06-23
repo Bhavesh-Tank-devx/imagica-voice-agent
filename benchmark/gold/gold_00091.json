@@ -1,0 +1,384 @@
+{
+  "_source_call_id": 91,
+  "_recorded_disposition": "NO_ANSWER",
+  "_suggested": false,
+  "goal": "(no real conversation)",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello!!",
+      "ts": "2026-06-02T12:10:13.909756"
+    },
+    {
+      "role": "user",
+      "text": "Hello?",
+      "ts": "2026-06-02T12:10:20.483957"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you for calling Kaya Clinic. This is Priya. How may I help you today?",
+      "ts": "2026-06-02T12:10:20.518234"
+    },
+    {
+      "role": "user",
+      "text": "You called me. What is the reason for the call?",
+      "ts": "2026-06-02T12:10:30.053504"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] [Empathetically] Hello, am I speaking with Bhavesh? Hi, this is Priya calling from Kaya Clinic. You recently filled out a form on our website. Is this a good time to talk?",
+      "ts": "2026-06-02T12:10:32.808612"
+    },
+    {
+      "role": "user",
+      "text": "Yes.",
+      "ts": "2026-06-02T12:10:43.499433"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Could you tell me a little about the concern you'd like to address — is it related to your skin, hair, or something else?",
+      "ts": "2026-06-02T12:10:45.472125"
+    },
+    {
+      "role": "user",
+      "text": "Uh, yes. It is about my hair.",
+      "ts": "2026-06-02T12:10:57.662654"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you for sharing, Bhavesh. We offer various hair treatments like hair loss treatment, PRP, and laser hair reduction. Our expert dermatologist will evaluate your concern and create a personalised plan for you.",
+      "ts": "2026-06-02T12:11:00.299112"
+    },
+    {
+      "role": "user",
+      "text": "Oh.",
+      "ts": "2026-06-02T12:11:13.508362"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] I have your first name as Bhavesh, could I please get your last name for the booking?",
+      "ts": "2026-06-02T12:11:14.605137"
+    },
+    {
+      "role": "user",
+      "text": "Bhagat.",
+      "ts": "2026-06-02T12:11:23.266919"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you, Bhavesh Bhagat. Which city are you based in?",
+      "ts": "2026-06-02T12:11:23.783095"
+    },
+    {
+      "role": "user",
+      "text": "Vadodara. My last name is Thak.",
+      "ts": "2026-06-02T12:11:33.582284"
+    },
+    {
+      "role": "agent",
+      "text": "My apologies, Bhavesh Thak. Thank you for the correction. [Patiently] We have a branch in Jetalpur, Vadodara. Would that be convenient for you?",
+      "ts": "2026-06-02T12:11:35.534416"
+    },
+    {
+      "role": "user",
+      "text": "Can you, can, can you spell the spelling of my last name?",
+      "ts": "2026-06-02T12:11:45.816793"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Certainly. Could you please spell your last name for me?",
+      "ts": "2026-06-02T12:11:46.367369"
+    },
+    {
+      "role": "user",
+      "text": "You tell what you wrote as my last name.",
+      "ts": "2026-06-02T12:11:56.460667"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] I had noted it as T-H-A-K. Is that correct?",
+      "ts": "2026-06-02T12:11:57.171791"
+    },
+    {
+      "role": "user",
+      "text": "No, no, no. T-A-N-K. That is what my last name is.",
+      "ts": "2026-06-02T12:12:10.477827"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you for clarifying. So, it's Bhavesh Tank. I've updated that for you. [Patiently] Now, regarding your appointment, what date works best for you?",
+      "ts": "2026-06-02T12:12:12.597086"
+    },
+    {
+      "role": "user",
+      "text": "Uh...",
+      "ts": "2026-06-02T12:12:24.809153"
+    },
+    {
+      "role": "agent",
+      "text": "...",
+      "ts": "2026-06-02T12:12:25.166413"
+    },
+    {
+      "role": "user",
+      "text": "What about 5 June?",
+      "ts": "2026-06-02T12:12:30.272084"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you. And what time of day would be convenient for you on June five — morning, afternoon, or evening?",
+      "ts": "2026-06-02T12:12:31.327910"
+    },
+    {
+      "role": "user",
+      "text": "Late evening.",
+      "ts": "2026-06-02T12:12:43.353535"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] We book in 30-minute slots. For late evening, would six o'clock or six thirty PM work better for you?",
+      "ts": "2026-06-02T12:12:44.455629"
+    },
+    {
+      "role": "user",
+      "text": "Uh, can you do it at seven o'clock?",
+      "ts": "2026-06-02T12:12:58.812461"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Yes, seven o'clock is available. [Patiently] So, that's June five at seven PM. Does that sound right?",
+      "ts": "2026-06-02T12:13:00.492420"
+    },
+    {
+      "role": "user",
+      "text": "Yes, looks good to me.",
+      "ts": "2026-06-02T12:13:12.319287"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Perfect. I'd like to let you know, a basic consultation is completely free. If your concern requires a detailed medical evaluation by the doctor, the fee is seven hundred fifty rupees.",
+      "ts": "2026-06-02T12:13:14.701205"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] What is your email address?",
+      "ts": "2026-06-02T12:13:29.931704"
+    },
+    {
+      "role": "user",
+      "text": "Oh. Uh, so I won't have to pay anything for this first visit, right?",
+      "ts": "2026-06-02T12:13:37.444952"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] That's right, the basic consultation is free. The fee of seven hundred fifty rupees only applies if a detailed medical evaluation is needed.",
+      "ts": "2026-06-02T12:13:39.442669"
+    },
+    {
+      "role": "user",
+      "text": "How can I know if I need a medical evaluation?",
+      "ts": "2026-06-02T12:13:53.977248"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] The dermatologist will determine that during your consultation, based on your specific hair concern. They will discuss it with you before any charges apply.",
+      "ts": "2026-06-02T12:13:56.185149"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Great. What is your email address?",
+      "ts": "2026-06-02T12:14:08.064289"
+    },
+    {
+      "role": "user",
+      "text": "Oh, okay. That's great.",
+      "ts": "2026-06-02T12:14:08.957414"
+    },
+    {
+      "role": "user",
+      "text": "R369rtaak@gmail.com.",
+      "ts": "2026-06-02T12:14:20.930277"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Thank you. Just to confirm, is that R three six nine R T A A K at gmail dot com?",
+      "ts": "2026-06-02T12:14:22.249163"
+    },
+    {
+      "role": "user",
+      "text": "No, no, that is totally wrong. My email address is bhavesh369rtak@gmail.com.",
+      "ts": "2026-06-02T12:14:44.137026"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] My apologies. Let me confirm that for you: B H A V E S H three six nine R T A K at gmail dot com. Is that correct?",
+      "ts": "2026-06-02T12:14:46.938111"
+    },
+    {
+      "role": "user",
+      "text": "No. No, no. R E A N K.",
+      "ts": "2026-06-02T12:15:04.655479"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Thank you...",
+      "ts": "2026-06-02T12:15:05.272322"
+    },
+    {
+      "role": "user",
+      "text": "@gmail.com.",
+      "ts": "2026-06-02T12:15:08.968897"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you for clarifying. So, that's B H A V E S H three six nine R E A N K at gmail dot com. Is that correct?",
+      "ts": "2026-06-02T12:15:11.509647"
+    },
+    {
+      "role": "user",
+      "text": "No, no, no. You got it wrong again. It is 3 6 9 R T A N K at the gmail dot com.",
+      "ts": "2026-06-02T12:15:35.416173"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Thank you for your patience. Let me try again. Is your email address B H A V E S H three six nine R T A N K at gmail dot com?",
+      "ts": "2026-06-02T12:15:37.981657"
+    },
+    {
+      "role": "user",
+      "text": "Yes, yes. That is correct now.",
+      "ts": "2026-06-02T12:15:54.611955"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Wonderful. And what is your Date of Birth?",
+      "ts": "2026-06-02T12:15:54.880429"
+    },
+    {
+      "role": "user",
+      "text": "Is it required?",
+      "ts": "2026-06-02T12:16:01.089114"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Yes, it is required to complete your booking.",
+      "ts": "2026-06-02T12:16:01.575558"
+    },
+    {
+      "role": "user",
+      "text": "Why?",
+      "ts": "2026-06-02T12:16:06.731437"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] It helps...",
+      "ts": "2026-06-02T12:16:07.633223"
+    },
+    {
+      "role": "user",
+      "text": "Why do you need my birthday?",
+      "ts": "2026-06-02T12:16:09.862645"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] We require your date of birth for our records and to ensure accurate patient identification.",
+      "ts": "2026-06-02T12:16:10.519257"
+    },
+    {
+      "role": "user",
+      "text": "Okay. Then it is 16 February, 2004.",
+      "ts": "2026-06-02T12:16:24.558611"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Thank you. What is your six-digit pin code to complete the booking?",
+      "ts": "2026-06-02T12:16:25.310050"
+    },
+    {
+      "role": "user",
+      "text": "Uh, I don't know.",
+      "ts": "2026-06-02T12:16:32.990968"
+    },
+    {
+      "role": "agent",
+      "text": "...",
+      "ts": "2026-06-02T12:16:33.220941"
+    },
+    {
+      "role": "user",
+      "text": "My city is Surat.",
+      "ts": "2026-06-02T12:16:35.038063"
+    },
+    {
+      "role": "agent",
+      "text": "...",
+      "ts": "2026-06-02T12:16:35.226847"
+    },
+    {
+      "role": "user",
+      "text": "Does, does that work?",
+      "ts": "2026-06-02T12:16:37.454522"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] We had previously confirmed your city as Vadodara. Could you please confirm which city you are currently in?",
+      "ts": "2026-06-02T12:16:38.690941"
+    },
+    {
+      "role": "user",
+      "text": "I am in Surat. I never said about Vadodara.",
+      "ts": "2026-06-02T12:16:49.653213"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] My apologies for the misunderstanding. You mentioned Vadodara earlier when I asked which city you were based in. [Warmly] Since you are in Surat, we have branches in Vesu and Ghod Dod Road. Which one would be more convenient for you?",
+      "ts": "2026-06-02T12:16:53.025972"
+    },
+    {
+      "role": "user",
+      "text": "Uh, which one would be more closer to me? Can you tell me?",
+      "ts": "2026-06-02T12:17:12.861386"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] To help me find the closest branch, could you please provide your six-digit pin code?",
+      "ts": "2026-06-02T12:17:13.460449"
+    },
+    {
+      "role": "user",
+      "text": "Uh, actually, I don't know the pin code I currently live at. I am new to here. Uh, I live in Amrili. Can you check it, which one is near to me?",
+      "ts": "2026-06-02T12:17:33.707635"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] I'm checking for the closest branch in Surat for you. Please bear with me for a moment.",
+      "ts": "2026-06-02T12:17:35.497412"
+    },
+    {
+      "role": "agent",
+      "text": "...",
+      "ts": "2026-06-02T12:17:41.173380"
+    },
+    {
+      "role": "user",
+      "text": "Okay, no problem.",
+      "ts": "2026-06-02T12:17:44.654260"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] In Surat, we have branches at Vesu and Ghod Dod Road. Which one is most convenient for you?",
+      "ts": "2026-06-02T12:17:45.790288"
+    },
+    {
+      "role": "user",
+      "text": "Can't you tell me?",
+      "ts": "2026-06-02T12:17:56.778234"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] I can't tell you which one is closer without your pin code. Would you prefer Vesu or Ghod Dod Road?",
+      "ts": "2026-06-02T12:17:56.829524"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "_source_call_id": 44,
+  "_recorded_disposition": "INTERESTED_LINK_SENT",
+  "_suggested": true,
+  "goal": "get a booking link / proceed",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Bhavesh ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 12 April 2026 ke liye tickets cart mein add kiye the — 2 Adult, 2 Child ke liye. Booking complete nahi hui thi, toh socha aapko ek baar remind kar doon. Koi problem thi kya?",
+      "ts": "2026-03-27T10:16:12.978973"
+    },
+    {
+      "role": "user",
+      "text": "हां, टिकट थोड़ी महंगी थी।",
+      "ts": "2026-03-27T10:16:35.756511"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha, price ka issue tha. Koi baat nahi Bhavesh ji, main definitely usmein help kar sakti hoon. Kya main aapko 10% discount offer karoon taaki aap booking complete kar sakein?",
+      "ts": "2026-03-27T10:16:33.279990"
+    },
+    {
+      "role": "user",
+      "text": "हां। हां। ठीक है।",
+      "ts": "2026-03-27T10:16:49.298067"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, maine 10% discount apply kar diya hai. Aapko ek naya link mil gaya hoga SMS pe. Kya aap ab book kar lenge?",
+      "ts": "2026-03-27T10:16:50.898857"
+    },
+    {
+      "role": "user",
+      "text": "हां, देखूगा।",
+      "ts": "2026-03-27T10:17:03.568686"
+    },
+    {
+      "role": "agent",
+      "text": "Koi baat nahi, main link bhej deti hoon aapko, jab time mile dekh lena. Theek hai?",
+      "ts": "2026-03-27T10:17:02.444740"
+    },
+    {
+      "role": "user",
+      "text": "Haan ok.",
+      "ts": "2026-03-27T10:17:11.693895"
+    }
+  ]
+}

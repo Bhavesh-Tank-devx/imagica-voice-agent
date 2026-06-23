@@ -1,0 +1,189 @@
+{
+  "_source_call_id": 98,
+  "_recorded_disposition": "CONVERTED",
+  "_suggested": true,
+  "goal": "book an appointment",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello Bhavesh , I am Priya from Kaya Clinic. Is this right time to talk to you?",
+      "ts": "2026-06-02T21:42:24.582182"
+    },
+    {
+      "role": "user",
+      "text": "Yes.",
+      "ts": "2026-06-02T21:42:33.003934"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Great! Could you please tell me what concern you'd like to address – is it related to skin, hair, or something else?",
+      "ts": "2026-06-02T21:42:34.951015"
+    },
+    {
+      "role": "user",
+      "text": "Haan, mujhe face pe thode pimpleshain.",
+      "ts": "2026-06-02T21:42:47.912681"
+    },
+    {
+      "role": "agent",
+      "text": "[Empathetically] theek hai, pimples ke liye hamare paas chemical peels aur facials jaise treatments hain. Hamare dermatologist aapke concern ko evaluate karke ek [confident] personalised plan banayenge.\n",
+      "ts": "2026-06-02T21:42:50.164846"
+    },
+    {
+      "role": "user",
+      "text": "अच्छा?",
+      "ts": "2026-06-02T21:43:06.310190"
+    },
+    {
+      "role": "agent",
+      "text": "Haan bilkul. Aapka first name Bhavesh hai, [Patiently] could I please get your last name?\n",
+      "ts": "2026-06-02T21:43:07.630859"
+    },
+    {
+      "role": "user",
+      "text": "मेरा last name टांक है।",
+      "ts": "2026-06-02T21:43:18.582819"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Theek hai, Bhavesh Tank. Aap kaun se city mein rehte hain?\n",
+      "ts": "2026-06-02T21:43:19.216111"
+    },
+    {
+      "role": "user",
+      "text": "Surat mein rehta hoon.",
+      "ts": "2026-06-02T21:43:28.269239"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] theek hai, aap Surat mein rehte hain. Surat mein hamare do branches hain: Vesu aur Ghod Dod Road. Aapke liye kaun sa convenient rahega?\n",
+      "ts": "2026-06-02T21:43:30.202076"
+    },
+    {
+      "role": "user",
+      "text": "Ghod Dod Road.",
+      "ts": "2026-06-02T21:43:42.448488"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Theek hai, main aapka appointment Ghod Dod Road, Surat branch mein note kar leti hoon. Ab aap apni preferred appointment date batayein?\n",
+      "ts": "2026-06-02T21:43:44.589383"
+    },
+    {
+      "role": "user",
+      "text": "Aa, iss Shaniwar ko.6 June.",
+      "ts": "2026-06-02T21:43:57.817183"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] theek hai, 6 June ko. Aur time kya prefer karenge aap? Hamare clinic hours subah 10 baje se raat 8 baje tak hain, aur hum 30-minute slots mein book karte hain.\n",
+      "ts": "2026-06-02T21:44:00.628686"
+    },
+    {
+      "role": "user",
+      "text": "Raam ko 7 baje।",
+      "ts": "2026-06-02T21:44:16.311962"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Theek hai, shaam ko 7 baje ka slot available hai. Main aapka appointment 6 June ko shaam 7:00 baje Ghod Dod Road branch, Surat mein book kar rahi hoon.\n",
+      "ts": "2026-06-02T21:44:19.087920"
+    },
+    {
+      "role": "user",
+      "text": "Okay, ठीक है।",
+      "ts": "2026-06-02T21:44:31.001134"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] theek hai. Ek basic consultation bilkul free hai. Agar detailed medical evaluation ki zaroorat padti hai, toh uski fees Rs. 750 hogi.\n",
+      "ts": "2026-06-02T21:44:32.762361"
+    },
+    {
+      "role": "user",
+      "text": "Okay, no problem.",
+      "ts": "2026-06-02T21:44:46.065702"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] theek hai. Ab aap apni email address bata sakte hain?\n",
+      "ts": "2026-06-02T21:44:46.562989"
+    },
+    {
+      "role": "user",
+      "text": "bhavesh369rta@gmail.com",
+      "ts": "2026-06-02T21:45:00.797663"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] theek hai. Aapki email address hai B-H-A-V-E-S-H-3-6-9-R-T-A at gmail dot com. Sahi hai?\n",
+      "ts": "2026-06-02T21:45:02.748107"
+    },
+    {
+      "role": "user",
+      "text": "नहीं, नहीं. 3-6-9-T-A-N-K.",
+      "ts": "2026-06-02T21:45:20.733633"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Okay, my apologies. Toh correct email address hai B-H-A-V-E-S-H-3-6-9-T-A-N-K at gmail dot com. Sahi hai?\n",
+      "ts": "2026-06-02T21:45:23.047684"
+    },
+    {
+      "role": "user",
+      "text": "हाँ, सही है।",
+      "ts": "2026-06-02T21:45:35.792197"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] theek hai. Aur aapki date of birth kya hai?\n",
+      "ts": "2026-06-02T21:45:36.400071"
+    },
+    {
+      "role": "user",
+      "text": "16 फरवरी 2004.",
+      "ts": "2026-06-02T21:45:46.130368"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] theek hai. Aapka date of birth 16 February 2004 hai. Aur aapka 6-digit pin code kya hai?\n",
+      "ts": "2026-06-02T21:45:47.666611"
+    },
+    {
+      "role": "user",
+      "text": "394107.",
+      "ts": "2026-06-02T21:46:00.281756"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] theek hai, aapka pin code 394107 hai.\n",
+      "ts": "2026-06-02T21:46:00.673404"
+    },
+    {
+      "role": "user",
+      "text": "हाँ।",
+      "ts": "2026-06-02T21:46:16.194464"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] theek hai. Aapka naam Bhavesh Tank, appointment Ghod Dod Road, Surat mein 6 June ko shaam 7 baje, aur aapko pimples ka concern hai. Sab details sahi hain?\n",
+      "ts": "2026-06-02T21:46:19.211856"
+    },
+    {
+      "role": "agent",
+      "text": "[Patiently] Can you hear me?\n",
+      "ts": "2026-06-02T21:46:29.438253"
+    },
+    {
+      "role": "user",
+      "text": "Hello?हाँ, totally correct.",
+      "ts": "2026-06-02T21:46:32.556110"
+    },
+    {
+      "role": "agent",
+      "text": "[Warmly] Aapka appointment book ho gaya hai aur aapko jald hi confirmation mil jayegi. Have a wonderful day, bye!",
+      "ts": "2026-06-02T21:46:36.576458"
+    }
+  ]
+}

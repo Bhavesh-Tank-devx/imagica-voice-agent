@@ -1,0 +1,44 @@
+{
+  "_source_call_id": 46,
+  "_recorded_disposition": "CALLBACK_SCHEDULED",
+  "_suggested": true,
+  "goal": "arrange a callback",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, LoadUser2 ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 15 May 2026 ke liye tickets cart mein add kiye the — 2 Adult ke liye. Booking complete nahi hui thi, toh socha aapko ek baar remind kar doon. Koi problem thi kya?",
+      "ts": "2026-03-27T11:29:35.486761"
+    },
+    {
+      "role": "user",
+      "text": "नहीं कोई प्रॉब्लम नहीं थी?",
+      "ts": "2026-03-27T11:29:56.355889"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha, theek hai. Toh",
+      "ts": "2026-03-27T11:29:55.067676"
+    },
+    {
+      "role": "user",
+      "text": "Wo Kuch kaam a gaya tha isliye.",
+      "ts": "2026-03-27T11:30:00.477585"
+    },
+    {
+      "role": "agent",
+      "text": "Koi baat nahi. Kya aap chahte hain main aapko baad mein call karoon? Koi preferred time?",
+      "ts": "2026-03-27T11:29:59.307967"
+    },
+    {
+      "role": "user",
+      "text": "शाम को करना।",
+      "ts": "2026-03-27T11:30:09.567460"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, main aapko shaam ko call karti hoon. Have a great day!",
+      "ts": "2026-03-27T11:30:10.548730"
+    }
+  ]
+}

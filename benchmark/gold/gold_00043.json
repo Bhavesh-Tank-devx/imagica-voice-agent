@@ -1,0 +1,24 @@
+{
+  "_source_call_id": 43,
+  "_recorded_disposition": "TRANSFERRED_TO_HUMAN",
+  "_suggested": true,
+  "goal": "reach a human agent",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Bhavesh ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 12 April 2026 ke liye tickets cart mein add kiye the — 2 Adult, 2 Child ke liye. Booking complete nahi hui",
+      "ts": "2026-03-27T10:15:10.432716"
+    },
+    {
+      "role": "user",
+      "text": "apke mein jaisa mat lo.",
+      "ts": "2026-03-27T10:15:29.819859"
+    },
+    {
+      "role": "user",
+      "text": "Hello.",
+      "ts": "2026-03-27T10:15:33.195877"
+    }
+  ]
+}

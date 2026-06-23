@@ -6,3 +6,12 @@ __pycache__/
 .DS_Store
 *.wav
 logs/
+benchmark_runs.db
+benchmark/corpus/*.wav.pytest_cache/
+.ruff_cache/
+
+# Keep benchmark gold fixtures (tracked despite the broad *.json ignore above)
+!benchmark/gold/*.json
+
+# Runtime SQLite DB with PII — keep local only
+data/post_call.db

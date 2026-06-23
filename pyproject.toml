@@ -1,0 +1,37 @@
+[project]
+name = "imagica-voice-agent"
+version = "1.0.0"
+description = "Outbound voice AI ('Priya') for Imagicaa Theme Park and Kaya Clinic."
+requires-python = ">=3.13"
+
+[tool.black]
+line-length = 88
+target-version = ["py313"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+extend-exclude = ["custom_LLM", "benchmark/gold"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B"]
+ignore = [
+    "E501",  # line length handled by the formatter
+    "N818",  # legacy disposition constant naming
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/conversation/imagica_prompt.py" = ["E501"]
+"src/conversation/kaya_prompt.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+# Only collect tests/ — the root test_*.py files are connectivity scripts that
+# execute network calls at import time and must not be collected.
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+asyncio_mode = "auto"

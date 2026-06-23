@@ -6,43 +6,28 @@ An AI outbound voice agent that calls customers who abandoned their booking cart
 
 ## How Many Terminals You Need
 
-**2 terminals** to run the full system:
+The live system (ElevenLabs + Twilio) runs as **one server process** plus a tunnel.
+The Twilio ↔ ElevenLabs audio bridge runs inside the server — there is no separate
+agent worker on the live path. The LiveKit/Gemini worker is legacy (see below).
 
-| Terminal | Command                 | What it does                                                |
-| -------- | ----------------------- | ----------------------------------------------------------- |
-| **1**    | `python agent.py start` | Agent worker — connects to LiveKit, waits for dispatch jobs |
-| **2**    | `python main.py`        | FastAPI webhook server + dashboard on port 8000             |
-
-Both must be running simultaneously. Start Terminal 1 first.
+| Terminal | Command                                            | What it does                                   |
+| -------- | -------------------------------------------------- | ---------------------------------------------- |
+| **1**    | `uvicorn src.main:app --host 0.0.0.0 --port 8000`  | FastAPI webhook server + dashboard on port 8000 |
+| **2**    | `ngrok http --url=...ngrok-free.dev 8000`          | Public tunnel for Twilio/ElevenLabs callbacks   |
 
 ---
 
 ## Quick Start (after IDE crash / fresh session)
 
-### Terminal 1 — Agent Worker
+### Terminal 1 — Webhook Server + Dashboard
 
 ```bash
 cd ~/imagica-voice-agent
 source venv/bin/activate
-python agent.py start
+uvicorn src.main:app --host 0.0.0.0 --port 8000
 ```
 
-You should see something like:
-
-```
-Starting worker in production mode...
-Registered worker, waiting for jobs...
-```
-
-### Terminal 2 — Webhook Server + Dashboard
-
-```bash
-cd ~/imagica-voice-agent
-source venv/bin/activate
-python main.py
-```
-
-### Terminal 3 - ngrok
+### Terminal 2 - ngrok
 
 ngrok http --url=redressable-spectrochemical-aarav.ngrok-free.dev 8000
 
@@ -54,6 +39,38 @@ INFO:     Imagica webhook server started
 ```
 
 Then open **http://localhost:8000** — the dev dashboard loads with a booking form.
+
+---
+
+## Codebase Layout
+
+All application code lives under `src/`, split by domain:
+
+```
+src/
+  main.py              app factory for the live webhook server (uvicorn src.main:app)
+  config.py            pydantic-settings (Twilio, ElevenLabs, calling hours, ...)
+  constants.py         Disposition / AgentType enums
+  telephony/           Twilio dialing + Twilio↔ElevenLabs media bridge
+  webhooks/            cart-abandoned / kaya-lead / call-ended routers
+  conversation/        prompts, language detection, email cleanup, branch lookup
+  persistence/         SQLite "CRM": call logs, queue, sessions, Kaya bookings
+  sms/                 multi-provider booking-link SMS
+  retry/               retry policy for unanswered / busy calls
+  dashboard/           dashboard pages + observability endpoints
+  worker/              legacy LiveKit + Gemini realtime agent worker
+  elevenlabs_native/   alternative ElevenLabs-hosted outbound server
+```
+
+### Other entrypoints
+
+```bash
+# Legacy LiveKit + Gemini realtime worker (only for the LiveKit deployment)
+python -m src.worker.livekit_agent dev
+
+# Alternative ElevenLabs-native outbound server (port 8001)
+uvicorn src.elevenlabs_native.app:app --host 0.0.0.0 --port 8001
+```
 
 ---
 
@@ -118,7 +135,7 @@ FastAPI (main.py)  ←──── GET / (dashboard.html)
   └── mark_not_interested
      │
      ▼
-  post_call.py → SQLite (post_call.db)
+  post_call.py → SQLite (data/post_call.db)
      │
      ▼
   retry.py → FastAPI /internal/schedule-retry
@@ -130,22 +147,24 @@ FastAPI (main.py)  ←──── GET / (dashboard.html)
 
 ## File Structure
 
+Application code lives in `src/` (see **Codebase Layout** above). Top-level:
+
 ```
 imagica-voice-agent/
-├── agent.py          — PriyaAgent: system prompt, function tools, transcript capture,
-│                       latency measurement, post-call logging, retry handoff
-├── main.py           — FastAPI: dashboard route, token endpoint, webhook handler,
-│                       room/dispatch creation, SIP dial, retry scheduling
-├── dashboard.html    — Dev dashboard: booking form, mode toggle, call history
-├── post_call.py      — SQLite CRM mock: init_db(), log_call(), get_call_logs(), get_metrics()
-├── retry.py          — Retry constants and schedule_retry() handoff to FastAPI
-├── sms.py            — SMS sender: MSG91 → Twilio → mock log (priority order)
-├── log_setup.py      — File + console logging setup; write_call_summary()
-├── mock_data.py      — Hardcoded CART_DATA fallback for local dev
-├── test_gemini_live.py — Standalone connectivity test: sends prompt, saves output.wav
-├── post_call.db      — SQLite database (auto-created on first call)
+├── src/              — application code, split by domain (see Codebase Layout)
+├── tests/            — pytest suite (run: pytest)
+├── scripts/          — ops & connectivity scripts (load_test, concurrent_test,
+│                       test_gemini_live, test_elevenlabs)
+├── web/              — dashboard HTML pages served by src/dashboard
+├── docs/             — guides, plans, study, session notes, system_prompt.md
+│   └── knowledge_base/ — Kaya Clinic KB text (uploaded to the ElevenLabs dashboard)
+├── benchmark/        — multi-stack Class B metric harness
+├── custom_LLM/       — standalone Claude↔ElevenLabs proxy server
+├── data/             — SQLite databases (post_call.db; benchmark_runs.db is gitignored)
 ├── requirements.txt  — Python dependencies
-└── .env              — Secrets and config (not committed)
+├── pyproject.toml    — ruff / black / mypy / pytest config
+├── README.md · CLAUDE.md
+└── .env              — secrets and config (not committed)
 ```
 
 ---
@@ -192,7 +211,7 @@ LIVEKIT_SIP_TRUNK_ID=ST_xxxxxxxxxxxxxxxx
 CCT_DEMO_PHONE=+91XXXXXXXXXX   # human handoff number for transfer_to_human
 ```
 
-> **Region note**: `gemini-live-2.5-flash-native-audio` is only available in `us-central1` on most GCP projects. Test with `python test_gemini_live.py` before changing the region.
+> **Region note**: `gemini-live-2.5-flash-native-audio` is only available in `us-central1` on most GCP projects. Test with `python scripts/test_gemini_live.py` before changing the region.
 
 ---
 
@@ -241,7 +260,7 @@ Paste the token into `https://meet.livekit.io/custom?liveKitUrl=YOUR_URL&token=T
 
 ```bash
 source venv/bin/activate
-python test_gemini_live.py
+python scripts/test_gemini_live.py
 afplay output.wav   # macOS: listen to Priya's response
 ```
 
@@ -284,18 +303,18 @@ Copy the `ST_xxx` trunk ID into `.env` as `LIVEKIT_SIP_TRUNK_ID`.
 
 ## Database
 
-SQLite file: `post_call.db` (auto-created on first call)
+SQLite file: `data/post_call.db` (auto-created on first call)
 
 **Inspect calls:**
 
 ```bash
-sqlite3 post_call.db "SELECT cart_id, customer_name, disposition, attempt_number, duration_seconds, called_at FROM call_logs ORDER BY id DESC LIMIT 20;"
+sqlite3 data/post_call.db "SELECT cart_id, customer_name, disposition, attempt_number, duration_seconds, called_at FROM call_logs ORDER BY id DESC LIMIT 20;"
 ```
 
 **Full transcript for a call:**
 
 ```bash
-sqlite3 post_call.db "SELECT transcript FROM call_logs WHERE id=1;"
+sqlite3 data/post_call.db "SELECT transcript FROM call_logs WHERE id=1;"
 ```
 
 ---

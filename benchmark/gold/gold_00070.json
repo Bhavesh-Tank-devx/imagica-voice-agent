@@ -1,0 +1,34 @@
+{
+  "_source_call_id": 70,
+  "_recorded_disposition": "NO_ANSWER",
+  "_suggested": false,
+  "goal": "(no real conversation)",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Vimal ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne",
+      "ts": "2026-03-27T12:36:01.350640"
+    },
+    {
+      "role": "user",
+      "text": "{} problema e di",
+      "ts": "2026-03-27T12:36:11.258101"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha, plans change ho gaye? Koi baat nahi. Kya main",
+      "ts": "2026-03-27T12:36:09.157508"
+    },
+    {
+      "role": "user",
+      "text": "Hello.",
+      "ts": "2026-03-27T12:36:13.262642"
+    },
+    {
+      "role": "user",
+      "text": "No.",
+      "ts": "2026-03-27T12:36:18.592841"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "_source_call_id": 42,
+  "_recorded_disposition": "NOT_INTERESTED",
+  "_suggested": false,
+  "goal": "decline / opt out",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Bhavesh ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 12 April 2026 ke liye tickets cart mein add kiye the — 2 Adult, 2 Child ke liye. Booking complete nahi hui thi, toh socha aapko ek baar remind kar doon. Koi problem thi kya?",
+      "ts": "2026-03-26T18:29:33.050110"
+    },
+    {
+      "role": "user",
+      "text": "Tikki thodi mehangi hai.",
+      "ts": "2026-03-26T18:29:57.225799"
+    },
+    {
+      "role": "agent",
+      "text": "Haan, Bhavesh ji, total ₹4796 ka amount ho raha tha. Kya budget ka issue tha? Main aapko discount de sakti hoon usmein.",
+      "ts": "2026-03-26T18:29:55.314157"
+    },
+    {
+      "role": "user",
+      "text": "दे दो ना, कुछ डिस्काउंट हो सके तो?",
+      "ts": "2026-03-26T18:30:08.685452"
+    },
+    {
+      "role": "agent",
+      "text": "Haan, bilkul! Main aapko 10% ka discount",
+      "ts": "2026-03-26T18:30:09.180842"
+    },
+    {
+      "role": "agent",
+      "text": "Maine aapko discount ke saath link bhej diya hai SMS",
+      "ts": "2026-03-26T18:30:12.645985"
+    },
+    {
+      "role": "user",
+      "text": "2,000",
+      "ts": "2026-03-26T18:30:15.984505"
+    },
+    {
+      "role": "agent",
+      "text": "Maine aapko",
+      "ts": "2026-03-26T18:30:14.757631"
+    },
+    {
+      "role": "agent",
+      "text": "Maine aapko discount ke saath link bhej diya hai SMS pe. Aap",
+      "ts": "2026-03-26T18:30:16.730400"
+    },
+    {
+      "role": "user",
+      "text": "humanity",
+      "ts": "2026-03-26T18:30:21.095887"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, maine link bhej diya hai. Aap check kar lena. Aur koi",
+      "ts": "2026-03-26T18:30:19.822508"
+    },
+    {
+      "role": "user",
+      "text": "कोई ईमेल-ईमेल",
+      "ts": "2026-03-26T18:30:32.405767"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, koi baat nahi. Agar aapka plan change ho toh, baad mein book kar lijiyega. Have a good day!",
+      "ts": "2026-03-26T18:30:33.260563"
+    }
+  ]
+}

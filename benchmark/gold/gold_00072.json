@@ -1,0 +1,49 @@
+{
+  "_source_call_id": 72,
+  "_recorded_disposition": "INTERESTED_LINK_SENT",
+  "_suggested": true,
+  "goal": "get a booking link / proceed",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Bhavya ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 25 April 2026 ke liye tickets cart mein add kiye the — 3 Adult, 1 Child ke liye. Booking complete nahi hui thi, toh socha ek baar remind kar doon. Koi problem thi kya?",
+      "ts": "2026-03-27T12:35:56.897236"
+    },
+    {
+      "role": "user",
+      "text": "ハイ プラス",
+      "ts": "2026-03-27T12:36:16.290626"
+    },
+    {
+      "role": "agent",
+      "text": "Haan, total ₹6996 ka amount ho raha tha. Kya price ko lekar koi concern hai?",
+      "ts": "2026-03-27T12:36:14.976166"
+    },
+    {
+      "role": "user",
+      "text": "Ya.",
+      "ts": "2026-03-27T12:36:27.240864"
+    },
+    {
+      "role": "agent",
+      "text": "Achcha, theek hai. Main aapko 10% ka discount offer kar sakti hoon. Usse aapki booking ₹6296 ki ho jaegi. Kya main apply kar doon?",
+      "ts": "2026-03-27T12:36:25.202852"
+    },
+    {
+      "role": "user",
+      "text": "Okay.",
+      "ts": "2026-03-27T12:36:36.930423"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, maine 10% ka discount apply kar diya hai. Aapko revised booking link SMS pe mil gaya hoga. Aap wahan se complete kar sakte hain.",
+      "ts": "2026-03-27T12:36:38.591337"
+    },
+    {
+      "role": "user",
+      "text": "Okay.",
+      "ts": "2026-03-27T12:36:51.757108"
+    }
+  ]
+}

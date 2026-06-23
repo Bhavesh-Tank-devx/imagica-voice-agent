@@ -1,0 +1,24 @@
+{
+  "_source_call_id": 65,
+  "_recorded_disposition": "INTERESTED_LINK_SENT",
+  "_suggested": true,
+  "goal": "get a booking link / proceed",
+  "human_goal_achieved": null,
+  "transcript": [
+    {
+      "role": "agent",
+      "text": "Hello, Bhavya ji! Main Priya bol rahi hoon, Imagicaa Theme Park se. Aapne recently 25 April 2026 ke liye tickets cart mein add kiye the — 3 Adult, 1 Child",
+      "ts": "2026-03-27T12:23:57.386319"
+    },
+    {
+      "role": "user",
+      "text": "3 x 1000",
+      "ts": "2026-03-27T12:24:09.534415"
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, maine aapko link bhej diya hai SMS pe. Aap jab chahein check kar sakte hain. Have a great day!",
+      "ts": "2026-03-27T12:24:11.059812"
+    }
+  ]
+}
